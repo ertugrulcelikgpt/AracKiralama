@@ -1,0 +1,20 @@
+{
+  "name": "rentacar",
+  "version": "1.0.0",
+  "description": "SAP CAP ile araç kiralama uygulaması (cap-sflight mimarisinden esinlenilmiştir)",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^10"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^3",
+    "@sap/cds-dk": "^10",
+    "eslint": "^10.13.0"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch",
+    "lint": "eslint ."
+  }
+}
