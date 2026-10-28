@@ -1,6 +1,6 @@
 # Mimari
 
-> Bu doküman her aşamada güncellenir. İstek akışı diyagramı Aşama 2–3'te eklenecek.
+> Bu doküman her aşamada güncellenir.
 
 ## Katmanlar
 
@@ -95,3 +95,33 @@ erDiagram
 
 Kod listeleri (`VehicleCategories`, `FuelTypes`, `TransmissionTypes`, `VehicleStatus`, `RentalStatus`) ve `Extras`
 çok dillidir: her biri için bir `_texts` tablosu ve bir `localized_` view'ı oluşur.
+
+## Servisler
+
+| Servis | Yol | Entity'ler | Not |
+|---|---|---|---|
+| `RentalService` | `/rental` | `Rentals` (draft), `RentalExtras`, `Customers`; salt okunur: `Vehicles`, `Branches`, `Extras`, kod listeleri | Şube çalışanı ve yönetici |
+| `AdminService` | `/admin` | `Vehicles` (draft), `Branches`, `Extras`, `VehicleCategories`; salt okunur: diğer kod listeleri | Filo yöneticisi |
+
+## İstek akışı
+
+Fiori'de bir kiralamayı düzenleyip kaydetmek (draft akışı):
+
+```mermaid
+sequenceDiagram
+  actor U as Kullanıcı
+  participant F as Fiori Elements
+  participant S as CAP RentalService
+  participant D as PostgreSQL
+  U->>F: "Düzenle"
+  F->>S: POST Rentals(...,IsActiveEntity=true)/draftEdit
+  S->>D: aktif satırı rentalservice_rentals_drafts'a kopyala + kilit (DraftAdministrativeData)
+  U->>F: alan değiştir
+  F->>S: PATCH Rentals(...,IsActiveEntity=false)
+  S->>D: sadece taslak satırı güncelle
+  U->>F: "Kaydet"
+  F->>S: POST Rentals(...,IsActiveEntity=false)/draftActivate
+  S->>S: doğrulamalar (@mandatory, Aşama 3'te K1–K8)
+  S->>D: rentacar_rentals'a yaz, taslağı sil
+  S-->>F: aktif kayıt (IsActiveEntity=true)
+```

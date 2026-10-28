@@ -25,6 +25,15 @@ npm run watch                       # http://localhost:4004
 
 Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run db:down`.
 
+## Servisler
+
+| Servis | URL | İçerik |
+|---|---|---|
+| `RentalService` | http://localhost:4004/rental | Kiralamalar (draft), müşteriler, value help verileri |
+| `AdminService` | http://localhost:4004/admin | Araçlar (draft), şubeler, ek hizmetler, kategoriler |
+
+Örnek istekler: [`test/requests.http`](test/requests.http) (VS Code REST Client eklentisi).
+
 ## Veritabanı profilleri
 
 | Profil | Veritabanı | Ne zaman |
@@ -38,9 +47,10 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 | Klasör / Dosya | Amaç |
 |---|---|
 | `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
-| `srv/` | Servis tanımları ve iş mantığı (JavaScript) |
+| `srv/` | `rental-service.cds`, `admin-service.cds` (+ Aşama 3'te iş mantığı `.js`) |
 | `app/` | Fiori Elements arayüzleri ve UI anotasyonları |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
+| `test/` | `requests.http` örnek istekleri (ileride otomatik testler) |
 | `docs/` | Mimari, iş kuralları, CAP–RAP karşılaştırması, sözlük, öğrenme notları |
 | `docker-compose.yml` | Lokal PostgreSQL |
 | `.env.example` | Lokal ortam değişkenleri şablonu (`.env` commit edilmez) |
@@ -65,8 +75,8 @@ Aşama 4'te (yetkilendirme) eklenecek: `agent`, `manager`, `admin`.
 |---|---|---|
 | 0 | Ortam ve iskelet (CAP, PostgreSQL, profiller) | ✅ |
 | 1 | Veri modeli ve örnek veri | ✅ |
-| 2 | Servisler | ⏳ |
-| 3 | İş mantığı (K1–K8, action'lar) | |
+| 2 | Servisler | ✅ |
+| 3 | İş mantığı (K1–K8, action'lar) | ⏳ |
 | 4 | Yetkilendirme | |
 | 5 | Fiori Elements arayüzü | |
 | 6 | Testler | |

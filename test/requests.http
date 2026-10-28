@@ -1,0 +1,125 @@
+### RentACar — örnek OData istekleri
+### VS Code "REST Client" eklentisi (humao.rest-client) ile her isteğin üstündeki "Send Request"e tıkla.
+### Önce: npm run db:up, npm run watch
+### Kullanıcı: Aşama 4'e kadar yetki yok; draft işlemleri için CAP'in hazır mock kullanıcısı "alice" kullanılıyor.
+
+@server = http://localhost:4004
+@auth = Basic alice:
+
+############################################################
+# 1) Servis meta verisi (EDMX): entity'ler, alanlar, anotasyonlar
+############################################################
+
+### RentalService $metadata
+GET {{server}}/rental/$metadata
+
+### AdminService $metadata
+GET {{server}}/admin/$metadata
+
+############################################################
+# 2) Sorgu seçenekleri (query options)
+############################################################
+
+### Açık kiralamalar: $filter + $select + $expand + $orderby
+GET {{server}}/rental/Rentals
+  ?$filter=status_code eq 'O'
+  &$select=rentalID,pickupDate,returnDate,totalPrice
+  &$expand=customer($select=fullName),vehicle($select=plate,brand,model)
+  &$orderby=pickupDate
+
+### Tek kiralama + ek hizmetleri (composition) + Türkçe statü adı
+GET {{server}}/rental/Rentals(ID=b1000000-0000-4000-8000-000000000005,IsActiveEntity=true)
+  ?$expand=status($select=name,criticality),extras($expand=extra($select=name))
+  &sap-locale=tr
+
+### Sayfalama ve toplam sayı: $top + $skip + $count
+GET {{server}}/rental/Rentals?$select=rentalID,totalPrice&$orderby=rentalID&$top=5&$skip=5&$count=true
+
+### Lambda filtresi: GPS ek hizmeti içeren kiralamaların sayısı
+GET {{server}}/rental/Rentals/$count?$filter=extras/any(e:e/extra_code eq 'GPS')
+
+### Müsait SUV'lar (araç value help'inin yapacağı sorgu)
+GET {{server}}/rental/Vehicles
+  ?$filter=status_code eq 'AV' and category_code eq 'SUV'
+  &$select=plate,brand,model,dailyRate
+  &$expand=fuelType($select=name),transmission($select=name)
+  &sap-locale=tr
+
+### Serbest metin araması ($search)
+GET {{server}}/rental/Customers?$search=Yılmaz&$select=fullName,email,city
+
+### Kod listesi, İngilizce
+GET {{server}}/rental/RentalStatus?sap-locale=en
+
+############################################################
+# 3) Draft akışı: oluştur → güncelle → aktive et
+############################################################
+
+### a) Yeni taslak oluştur (IsActiveEntity=false döner)
+# @name newDraft
+POST {{server}}/rental/Rentals
+Authorization: {{auth}}
+Content-Type: application/json
+
+{}
+
+### b) Taslağın yönetim bilgileri (kim oluşturdu, kim kilitliyor)
+GET {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=false)/DraftAdministrativeData
+Authorization: {{auth}}
+
+### c) Taslağı güncelle (her alan değişikliği bir PATCH)
+PATCH {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=false)
+Authorization: {{auth}}
+Content-Type: application/json
+
+{
+  "customer_ID": "c1000000-0000-4000-8000-000000000002",
+  "vehicle_ID": "a1000000-0000-4000-8000-000000000003",
+  "pickupBranch_code": "ANK-CEN",
+  "returnBranch_code": "ANK-CEN",
+  "pickupDate": "2026-12-01",
+  "returnDate": "2026-12-04"
+}
+
+### d) Taslağa ek hizmet ekle (composition içine POST)
+POST {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=false)/extras
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "extra_code": "GPS", "quantity": 1 }
+
+### e) Kaydet = draftActivate (taslak ana tabloya taşınır)
+POST {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=false)/RentalService.draftActivate
+Authorization: {{auth}}
+Content-Type: application/json
+
+{}
+
+### f) Aktif kaydı düzenlemeye aç = draftEdit
+POST {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=true)/RentalService.draftEdit
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "PreserveChanges": true }
+
+### g) Vazgeç = taslağı sil (aktif kayıt değişmeden kalır)
+DELETE {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=false)
+Authorization: {{auth}}
+
+### h) Denemeyi temizle: aktif kaydı sil
+DELETE {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=true)
+Authorization: {{auth}}
+
+############################################################
+# 4) Salt okunur ve yönetim servisi
+############################################################
+
+### RentalService'te araçlar salt okunur → 405 ENTITY_IS_READ_ONLY
+PATCH {{server}}/rental/Vehicles(a1000000-0000-4000-8000-000000000001)
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "dailyRate": 1 }
+
+### AdminService: araç listesi
+GET {{server}}/admin/Vehicles?$select=plate,brand,model,status_code&$filter=status_code eq 'MT'
