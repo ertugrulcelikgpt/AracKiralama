@@ -60,7 +60,7 @@ anotasyonlardan çizer.
 | "Kaydet" | `POST .../draftActivate` | Doğrulamalar (ör. `@mandatory`) çalışır, taslak ana tabloya yazılır ve silinir |
 | "Vazgeç" | `DELETE /Rentals(...,IsActiveEntity=false)` | Taslak silinir, aktif kayıt değişmez |
 
-Bu aşamada denendi: başka bir kullanıcı (`bob`), `alice`'in düzenlediği kaydı açmaya çalışınca
+Bu aşamada denendi (o zaman CAP'in hazır mock kullanıcıları vardı; Aşama 4'ten beri agent/manager/admin): başka bir kullanıcı (`bob`), `alice`'in düzenlediği kaydı açmaya çalışınca
 `DRAFT_ALREADY_EXISTS` hatası alır. Bu, draft'ın getirdiği **kilit** mekanizmasıdır.
 
 ## cap-sflight'taki karşılığı

@@ -166,31 +166,24 @@ export default class RentalService extends cds.ApplicationService {
       return Object.assign(rental, price)
     }
 
-    // Taslaktaki fiyatları yeniden hesaplayıp taslak tablolarına yazar (alan değişikliklerinde çağrılır)
-    async function recalculateDraft(rentalID) {
-      const rental = await SELECT.one.from(Rentals.drafts, rentalID)
-      if (!rental) return
-      const extras = await SELECT.from(RentalExtras.drafts).columns('ID', 'quantity', 'dailyPrice')
-        .where({ rental_ID: rentalID })
-      const vehicle = await readVehicle(rental.vehicle_ID)
-      const { rentalDays, basePrice, extrasPrice, oneWayFee, discountAmount, totalPrice } =
-        applyPrice(rental, vehicle, extras)
-      const price = { rentalDays, basePrice, extrasPrice, oneWayFee, discountAmount, totalPrice }
-      await UPDATE(Rentals.drafts, rentalID).with(price)
-      for (const { ID, amount } of extras) await UPDATE(RentalExtras.drafts, ID).with({ amount })
-      return price
-    }
-
-    // Aktif bir kiralamanın fiyatını yeniden hesaplar (applyDiscount sonrası)
-    async function recalculateActive(rental) {
-      const extras = await SELECT.from(db.RentalExtras).columns('ID', 'quantity', 'dailyPrice')
+    // Kayıtlı fiyatları yeniden hesaplayıp yazar: taslakta (alan değişince) veya aktif kayıtta (applyDiscount sonrası)
+    const DRAFTS = { Rentals: Rentals.drafts, RentalExtras: RentalExtras.drafts }
+    const ACTIVES = { Rentals: db.Rentals, RentalExtras: db.RentalExtras }
+    async function recalculate(tables, rental) {
+      const extras = await SELECT.from(tables.RentalExtras).columns('ID', 'quantity', 'dailyPrice')
         .where({ rental_ID: rental.ID })
       const vehicle = await readVehicle(rental.vehicle_ID)
       const { rentalDays, basePrice, extrasPrice, oneWayFee, discountAmount, totalPrice, discountPercent } =
         applyPrice(rental, vehicle, extras)
-      await UPDATE(db.Rentals, rental.ID).with(
-        { rentalDays, basePrice, extrasPrice, oneWayFee, discountAmount, totalPrice, discountPercent })
-      for (const { ID, amount } of extras) await UPDATE(db.RentalExtras, ID).with({ amount })
+      const price = { rentalDays, basePrice, extrasPrice, oneWayFee, discountAmount, totalPrice }
+      await UPDATE(tables.Rentals, rental.ID).with({ ...price, discountPercent })
+      for (const { ID, amount } of extras) await UPDATE(tables.RentalExtras, ID).with({ amount })
+      return price
+    }
+
+    async function recalculateDraft(rentalID) {
+      const rental = await SELECT.one.from(Rentals.drafts, rentalID)
+      return rental && recalculate(DRAFTS, rental)
     }
 
     async function activeRentalOf(req) {
@@ -325,7 +318,7 @@ export default class RentalService extends cds.ApplicationService {
         code: 'DISCOUNT_CAPPED',
         message: cds.i18n.messages.at('DISCOUNT_CAPPED', req.locale, [applied])
       })
-      await recalculateActive({ ...rental, discountPercent: applied })
+      await recalculate(ACTIVES, { ...rental, discountPercent: applied })
       return readResult(rental.ID)
     })
 

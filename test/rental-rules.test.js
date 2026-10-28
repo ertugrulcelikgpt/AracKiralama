@@ -106,7 +106,6 @@ describe('İş kuralları (RentalService)', () => {
     })
 
     it('hizmet dışı (RT) araç kiralanamaz', async () => {
-      await t.PATCH(`/admin/Vehicles(ID=${VEHICLE.golf},IsActiveEntity=true)`, {}, t.as('admin')).catch(() => {})
       // AdminService'te araçlar draft'lı; durumu draft akışıyla RT yap
       await t.POST(`/admin/Vehicles(ID=${VEHICLE.golf},IsActiveEntity=true)/AdminService.draftEdit`, { PreserveChanges: true }, t.as('admin'))
       await t.PATCH(`/admin/Vehicles(ID=${VEHICLE.golf},IsActiveEntity=false)`, { status_code: 'RT' }, t.as('admin'))

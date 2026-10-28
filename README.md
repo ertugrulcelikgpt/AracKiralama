@@ -49,13 +49,13 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 ## Testler
 
 ```powershell
-npm test            # 86 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
+npm test            # 92 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
 npm run test:pg     # aynı testler PostgreSQL'e karşı (ayrı rentacar_test veritabanı; önce npm run db:up)
 npm test -- --grep K2   # sadece adında "K2" geçen testler
 ```
 
 Kapsam: K1–K8 iş kuralları (başarılı ve hatalı durumlar), 5 action'ın ön koşulları, yetki (401/403), fiyat
-senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı. Ayrıntı ve SQLite–PostgreSQL farkları:
+senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı, ana veri silme koruması. Ayrıntı ve SQLite–PostgreSQL farkları:
 [`docs/ogrenme-notlari/07-testler.md`](docs/ogrenme-notlari/07-testler.md).
 
 ## Servisler
@@ -81,7 +81,7 @@ senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı. Ayrıntı 
 | Klasör / Dosya | Amaç |
 |---|---|
 | `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
-| `srv/` | `rental-service.cds` + `rental-service.js` (iş kuralları), `field-control.cds`, `admin-service.cds`, `auth.cds` (yetkiler) |
+| `srv/` | `rental-service.cds/.js` (kiralama, iş kuralları), `admin-service.cds/.js` (filo, silme koruması), `field-control.cds`, `auth.cds` (yetkiler) |
 | `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
 | `test/` | Otomatik testler (`*.test.js`, Mocha + `@cap-js/cds-test`), `requests.http` örnek istekleri |
@@ -101,6 +101,19 @@ Lokalde CAP'in `mocked` kimlik doğrulaması kullanılır (tarayıcı kullanıc�
 | `admin` / `admin` | FleetAdmin | Sadece filo yönetimi (AdminService) |
 
 Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BTP için taslak: `xs-security.json`.
+
+## Sorun giderme
+
+| Belirti | Sebep | Çözüm |
+|---|---|---|
+| `npm run db:up`: "Cannot connect to the Docker daemon" / "error during connect" | Docker Desktop çalışmıyor | Docker Desktop'ı başlat, sonra tekrar `npm run db:up` |
+| `npm run db:up`: "port is already allocated" | Bilgisayarda 5432'yi kullanan başka bir PostgreSQL var | `.env`'de `CDS_REQUIRES_DB_CREDENTIALS_PORT=5433` yap, `npm run db:up` |
+| "password authentication failed" | `.env` yok veya şifre farklı | `Copy-Item .env.example .env` |
+| İstekte "column ... does not exist" | Model değişti, veritabanı eski | `npm run db:deploy` (gerekirse `npm run db:reset`) |
+| `cds watch` `db:reset` sonrası "server shutdown" ile kapandı | Container yeniden kurulurken açık bağlantılar koptu | `npm run watch`'ı yeniden başlat |
+| Arayüz boş kalıyor veya yüklenmiyor | UI5, `ui5.sap.com`'dan yüklenir; internet veya kurumsal proxy engeli | `https://ui5.sap.com/1.153.0/resources/sap-ui-version.json` tarayıcıda açılıyor mu bak |
+| Hep aynı kullanıcıyla giriliyor | Tarayıcı Basic Auth bilgisini hatırlar | Başka kullanıcı için gizli pencere aç |
+| `npm run test:pg`: "ECONNREFUSED" | PostgreSQL ayakta değil | `npm run db:up` |
 
 ## Kullanılan teknolojiler
 
@@ -125,10 +138,17 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | 4 | Yetkilendirme | ✅ |
 | 5 | Fiori Elements arayüzü | ✅ |
 | 6 | Testler | ✅ |
-| 7 | Dokümantasyon ve gözden geçirme | ⏳ |
-| 8 | S/4HANA Business Partner entegrasyonu | |
+| 7 | Dokümantasyon ve gözden geçirme | ✅ |
+| 8 | S/4HANA Business Partner entegrasyonu | ⏳ |
 | 9 | (Opsiyonel) Analitik | |
 | 10 | BTP deploy hazırlığı (SAP HANA Cloud) | |
 
-Dokümanlar: [mimari](docs/mimari.md) · [iş kuralları](docs/is-kurallari.md) · [CAP vs RAP](docs/cap-vs-rap.md) ·
-[sözlük](docs/sozluk.md) · [öğrenme notları](docs/ogrenme-notlari/)
+## Dokümanlar
+
+| Doküman | İçerik |
+|---|---|
+| [Mimari](docs/mimari.md) | Katmanlar, veri modeli (ER diyagramı), istek akışı, yetki tablosu, testler |
+| [İş kuralları](docs/is-kurallari.md) | K1–K8, action'lar, silme koruması; her kuralın kodda ve testte yeri |
+| [CAP vs RAP](docs/cap-vs-rap.md) | Bu projedeki her yapının ABAP RAP karşılığı, hangisi ne zaman, RAP'i deneme yolları |
+| [Sözlük](docs/sozluk.md) | SAP/CAP terimleri (Türkçe) |
+| [Öğrenme notları](docs/ogrenme-notlari/README.md) | Her aşamanın kavramları, RAP karşılığı, sık hatalar ve alıştırmalar |

@@ -3,8 +3,8 @@
 ## Komutlar
 
 ```powershell
-npm test            # 86 test, bellek içi SQLite (~6 sn), Docker gerekmez
-npm run test:pg     # aynı 86 test, PostgreSQL (rentacar_test veritabanı, ~13 sn), önce: npm run db:up
+npm test            # 92 test, bellek içi SQLite (~6 sn), Docker gerekmez
+npm run test:pg     # aynı 92 test, PostgreSQL (rentacar_test veritabanı, ~13 sn), önce: npm run db:up
 ```
 
 ## Bu aşamada öğrenilen kavramlar
@@ -31,6 +31,7 @@ const { data } = await GET('/rental/Rentals', { auth: { username: 'agent', passw
 | `test/rental-rules.test.js` | Draft akışı, K1–K8 (başarılı ve hatalı), taslakta anlık fiyat, çoklu hata, TR/EN mesaj | 37 |
 | `test/rental-actions.test.js` | 5 action'ın ön koşulu ve sonucu, indirim kırpma + `sap-messages`, taslak kilidi | 20 |
 | `test/auth.test.js` | 401/403, rol bazlı action yetkisi, silme yasağı, salt okunur ana veri, `canManage` | 18 |
+| `test/admin.test.js` | Kullanımdaki araç/şube/ek hizmetin silinememesi (Aşama 7'de eklendi) | 6 |
 | `test/helpers.js` | Ortak yardımcılar: `draft()`, `activate()`, `createRental()`, `action()`, `failure()` | — |
 
 ### Testleri tarihten bağımsız yazmak
@@ -72,7 +73,7 @@ Aynı sorgular, aynı verilerle iki veritabanına gönderildi:
 | `cast(rentalID as String(10))` | `"1000"` | `"1000"` | Aynı |
 | Tarih karşılaştırması (`pickupDate ge 2026-11-10`, K2) | Doğru (tarih ISO metni) | Doğru (`DATE` tipi) | Aynı; CQL ile yazıldığı için |
 | `max(rentalID)` (K8) | Doğru | Doğru | Aynı |
-| Test süresi (86 test) | ~6 sn | ~13 sn | Günlük geliştirmede SQLite, CI'da ikisi |
+| Test süresi (86 test, Aşama 6) | ~6 sn | ~13 sn | Günlük geliştirmede SQLite, CI'da ikisi |
 | Eşzamanlılık | Tek yazıcı (dosya kilidi) | Gerçek eşzamanlı işlemler | K8 yarış durumu sadece PostgreSQL/HANA'da gerçekçi test edilir |
 
 Neden iş kurallarında tarih hesabını (yaş, gün farkı) SQL'de değil JavaScript'te yaptık: tarih fonksiyonları her

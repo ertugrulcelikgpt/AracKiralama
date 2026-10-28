@@ -54,6 +54,7 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 - `reject` action adı `ApplicationService.reject` ile çakıştığı için CAP başlangıçta uyarı verir; isim prompt
   gereği bilinçli olarak korunuyor, action çalışıyor.
 - `sap-messages` bilgi mesajları `cds.i18n.messages.at(key, req.locale, args)` ile çevrilir.
+- `srv/admin-service.js`: kiralamalarda kullanılan araç/şube/ek hizmet silinemez (409 `*_IN_USE`).
 
 ## Yetki
 
@@ -79,5 +80,10 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 
 ## Dokümantasyon
 
-`docs/` altındaki dosyalar her aşamada güncellenir: `mimari.md`, `is-kurallari.md`, `cap-vs-rap.md`, `sozluk.md`,
-`ogrenme-notlari/NN-*.md`. Yol haritası ve aşama durumu: README.md → "Yol haritası".
+`docs/` altındaki dosyalar her aşamada güncellenir: `mimari.md`, `is-kurallari.md`, `cap-vs-rap.md`, `sozluk.md`
+(alfabetik), `ogrenme-notlari/NN-*.md` (+ dizin `ogrenme-notlari/README.md`). Yol haritası: README.md → "Yol haritası".
+
+- Kod satırları kayınca `docs/is-kurallari.md`'deki `dosya:satır` referanslarını gerçek satırlara göre güncelle.
+- Mermaid diyagramlarını değiştirince ayrıştırılabildiğini kontrol et (mermaid npm paketi + Playwright ile render).
+- Her öğrenme notu aynı bölümleri içerir: kavramlar, cap-sflight karşılığı, ABAP RAP karşılığı (derlenmemiş örnek
+  kod), sık yapılan hatalar, çözümsüz alıştırmalar.
