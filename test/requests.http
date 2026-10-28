@@ -1,10 +1,12 @@
 ### RentACar — örnek OData istekleri
 ### VS Code "REST Client" eklentisi (humao.rest-client) ile her isteğin üstündeki "Send Request"e tıkla.
 ### Önce: npm run db:up, npm run watch
-### Kullanıcı: Aşama 4'e kadar yetki yok; draft işlemleri için CAP'in hazır mock kullanıcısı "alice" kullanılıyor.
+### Kullanıcılar (package.json → cds.requires.auth): agent/agent, manager/manager, admin/admin
 
 @server = http://localhost:4004
-@auth = Basic alice:
+@auth = Basic agent:agent
+@manager = Basic manager:manager
+@admin = Basic admin:admin
 
 ############################################################
 # 1) Servis meta verisi (EDMX): entity'ler, alanlar, anotasyonlar
@@ -12,9 +14,11 @@
 
 ### RentalService $metadata
 GET {{server}}/rental/$metadata
+Authorization: {{auth}}
 
 ### AdminService $metadata
 GET {{server}}/admin/$metadata
+Authorization: {{admin}}
 
 ############################################################
 # 2) Sorgu seçenekleri (query options)
@@ -26,17 +30,21 @@ GET {{server}}/rental/Rentals
   &$select=rentalID,pickupDate,returnDate,totalPrice
   &$expand=customer($select=fullName),vehicle($select=plate,brand,model)
   &$orderby=pickupDate
+Authorization: {{auth}}
 
 ### Tek kiralama + ek hizmetleri (composition) + Türkçe statü adı
 GET {{server}}/rental/Rentals(ID=b1000000-0000-4000-8000-000000000005,IsActiveEntity=true)
   ?$expand=status($select=name,criticality),extras($expand=extra($select=name))
   &sap-locale=tr
+Authorization: {{auth}}
 
 ### Sayfalama ve toplam sayı: $top + $skip + $count
 GET {{server}}/rental/Rentals?$select=rentalID,totalPrice&$orderby=rentalID&$top=5&$skip=5&$count=true
+Authorization: {{auth}}
 
 ### Lambda filtresi: GPS ek hizmeti içeren kiralamaların sayısı
 GET {{server}}/rental/Rentals/$count?$filter=extras/any(e:e/extra_code eq 'GPS')
+Authorization: {{auth}}
 
 ### Müsait SUV'lar (araç value help'inin yapacağı sorgu)
 GET {{server}}/rental/Vehicles
@@ -44,12 +52,15 @@ GET {{server}}/rental/Vehicles
   &$select=plate,brand,model,dailyRate
   &$expand=fuelType($select=name),transmission($select=name)
   &sap-locale=tr
+Authorization: {{auth}}
 
 ### Serbest metin araması ($search)
 GET {{server}}/rental/Customers?$search=Yılmaz&$select=fullName,email,city
+Authorization: {{auth}}
 
 ### Kod listesi, İngilizce
 GET {{server}}/rental/RentalStatus?sap-locale=en
+Authorization: {{auth}}
 
 ############################################################
 # 3) Draft akışı: oluştur → güncelle → aktive et
@@ -123,6 +134,7 @@ Content-Type: application/json
 
 ### AdminService: araç listesi
 GET {{server}}/admin/Vehicles?$select=plate,brand,model,status_code&$filter=status_code eq 'MT'
+Authorization: {{admin}}
 
 ############################################################
 # 5) İş kuralları (Aşama 3) — hatalı durumlar "Kaydet"te döner
@@ -157,14 +169,14 @@ Content-Type: application/json
 
 ### approve: O → A (pickupKm doldurulur)
 POST {{server}}/rental/Rentals(ID={{open1007}},IsActiveEntity=true)/RentalService.approve
-Authorization: {{auth}}
+Authorization: {{manager}}
 Content-Type: application/json
 
 {}
 
 ### reject: sebep zorunlu
 POST {{server}}/rental/Rentals(ID={{open1009}},IsActiveEntity=true)/RentalService.reject
-Authorization: {{auth}}
+Authorization: {{manager}}
 Content-Type: application/json
 
 { "reason": "Müşteri belgelerini teslim etmedi." }
@@ -192,7 +204,7 @@ Content-Type: application/json
 
 ### applyDiscount: 14 günlük kiralamada %15 uzun süre indirimi var; %20 istenirse %15'e kırpılır (sap-messages)
 POST {{server}}/rental/Rentals(ID={{open1008}},IsActiveEntity=true)/RentalService.applyDiscount
-Authorization: {{auth}}
+Authorization: {{manager}}
 Content-Type: application/json
 
 { "percent": 20 }
@@ -203,3 +215,42 @@ Authorization: {{auth}}
 Content-Type: application/json
 
 { "PreserveChanges": true }
+
+############################################################
+# 7) Yetkilendirme (Aşama 4): aynı istek, farklı kullanıcı
+############################################################
+
+### Giriş yok → 401
+GET {{server}}/rental/Rentals
+
+### agent → 200
+GET {{server}}/rental/Rentals?$top=1
+Authorization: {{auth}}
+
+### admin RentalService'e giremez → 403
+GET {{server}}/rental/Rentals?$top=1
+Authorization: {{admin}}
+
+### agent AdminService'e giremez → 403
+GET {{server}}/admin/Vehicles?$top=1
+Authorization: {{auth}}
+
+### agent onaylayamaz → 403 "Bu işlem için yetkiniz yok."
+POST {{server}}/rental/Rentals(ID={{open1007}},IsActiveEntity=true)/RentalService.approve
+Authorization: {{auth}}
+Accept-Language: tr
+Content-Type: application/json
+
+{}
+
+### agent kaydedilmiş kiralamayı silemez → 403 (iptal için cancel action'ı var)
+DELETE {{server}}/rental/Rentals(ID={{done1000}},IsActiveEntity=true)
+Authorization: {{auth}}
+
+### agent müşteri ekleyebilir → 201
+POST {{server}}/rental/Customers
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "firstName": "Deneme", "lastName": "Kullanıcı", "email": "deneme@example.com", "birthDate": "1990-01-01", "licenseIssueDate": "2010-01-01" }
+

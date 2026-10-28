@@ -1,0 +1,57 @@
+{
+  "xsappname": "rentacar",
+  "tenant-mode": "dedicated",
+  "description": "RentACar - SAP CAP araç kiralama uygulaması",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.RentalAgent",
+      "description": "Kiralama oluşturma, düzenleme, tamamlama ve iptal"
+    },
+    {
+      "name": "$XSAPPNAME.RentalManager",
+      "description": "Kiralama onaylama, reddetme ve indirim uygulama"
+    },
+    {
+      "name": "$XSAPPNAME.FleetAdmin",
+      "description": "Araç, şube ve ek hizmet ana verilerinin bakımı"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "RentalAgent",
+      "description": "Şube çalışanı",
+      "scope-references": ["$XSAPPNAME.RentalAgent"],
+      "attribute-references": []
+    },
+    {
+      "name": "RentalManager",
+      "description": "Şube yöneticisi",
+      "scope-references": ["$XSAPPNAME.RentalManager"],
+      "attribute-references": []
+    },
+    {
+      "name": "FleetAdmin",
+      "description": "Filo yöneticisi",
+      "scope-references": ["$XSAPPNAME.FleetAdmin"],
+      "attribute-references": []
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "RentACar_Agent",
+      "description": "RentACar şube çalışanı",
+      "role-template-references": ["$XSAPPNAME.RentalAgent"]
+    },
+    {
+      "name": "RentACar_Manager",
+      "description": "RentACar şube yöneticisi (çalışan yetkileri dahil)",
+      "role-template-references": ["$XSAPPNAME.RentalAgent", "$XSAPPNAME.RentalManager"]
+    },
+    {
+      "name": "RentACar_FleetAdmin",
+      "description": "RentACar filo yöneticisi",
+      "role-template-references": ["$XSAPPNAME.FleetAdmin"]
+    }
+  ]
+}

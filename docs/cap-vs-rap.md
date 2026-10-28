@@ -32,3 +32,8 @@
 | Veri erişimi | CQL (`SELECT.from(...)`, `UPDATE(...)`) | EML (`READ ENTITIES`, `MODIFY ENTITIES`) |
 | Hata mesajları | `_i18n/messages*.properties` + `req.error('KEY')` | Mesaj sınıfı (SE91 / ADT) + `new_message( id number )` |
 | Transaction | Her istek otomatik bir transaction | RAP LUW: interaction phase + save sequence |
+| Yetki (rol) | `@requires: 'RentalAgent'` | Yetki nesnesi + PFCG rolü |
+| Yetki (işlem bazında) | `@restrict: [{ grant: ['approve'], to: 'RentalManager' }]` | `authorization master` + `get_global/instance_authorizations` |
+| Okuma yetkisi / satır filtresi | `@restrict` + `where` | DCL (`define role ... grant select ... where`) |
+| Lokal test kullanıcıları | `mocked` auth, `package.json` kullanıcıları | Sistemde test kullanıcısı + PFCG rolü |
+| Bulut yetki yapılandırması | `xs-security.json` (XSUAA scope, role-template, role-collection) | IAM App + Business Catalog + Business Role (BTP ABAP Environment) |

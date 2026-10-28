@@ -23,7 +23,7 @@ Birden fazla kural aynı anda ihlal edilirse (ör. K1 + K3 + K4) hepsi tek yanı
 
 ## Action'lar
 
-| Action | Kim (Aşama 4) | Ön koşul | Etki | Kodda | Hata anahtarları |
+| Action | Kim (`srv/auth.cds`) | Ön koşul | Etki | Kodda | Hata anahtarları |
 |---|---|---|---|---|---|
 | `approve()` | Manager | status = O | status → A, `pickupKm` = aracın km'si | `srv/rental-service.js:268` | `APPROVE_NOT_OPEN` |
 | `reject(reason)` | Manager | status = O, sebep zorunlu | status → R, `rejectionReason` dolar | `:276` | `REJECT_NOT_OPEN`, `REJECT_REASON_REQUIRED` |

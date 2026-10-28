@@ -39,3 +39,10 @@
 | `req.error` / `req.reject` | Hata biriktirme / işlemi hemen durdurma. |
 | BDEF (Behavior Definition) | RAP'te bir iş nesnesinin davranışını (CRUD, action, validation, determination) bildiren nesne. |
 | EML (Entity Manipulation Language) | RAP'te iş nesnesini okuma/değiştirme dili: `READ ENTITIES`, `MODIFY ENTITIES`. |
+| Authentication / Authorization | Kimlik doğrulama (kimsin? → 401) / yetkilendirme (izin var mı? → 403). |
+| `@requires` / `@restrict` | Servis/entity için gereken rol / işlem bazında izinler. |
+| Mocked auth | Lokal geliştirmede `package.json`'daki kullanıcılarla Basic Auth girişi. |
+| XSUAA | BTP'nin kimlik ve yetki servisi; JWT token üretir. Yapılandırması `xs-security.json`. |
+| Scope / Role template / Role collection | XSUAA'da teknik yetki / scope grubu şablonu / kullanıcıya atanan rol paketi. |
+| JWT (JSON Web Token) | Kullanıcı kimliğini ve rollerini taşıyan imzalı token. |
+| DCL (Data Control Language) | RAP'te CDS view'lar için okuma yetkisi tanımlama dili (`define role`). |

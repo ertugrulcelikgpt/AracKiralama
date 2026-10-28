@@ -53,6 +53,12 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
   gereği bilinçli olarak korunuyor, action çalışıyor.
 - `sap-messages` bilgi mesajları `cds.i18n.messages.at(key, req.locale, args)` ile çevrilir.
 
+## Yetki
+
+- Roller `srv/auth.cds`'te (`@requires`, `@restrict`); JS'te rol kontrolü yazma.
+- Mock kullanıcılar (`package.json`, development + test): agent/agent, manager/manager, admin/admin.
+- `xs-security.json` elle düzenlendi (açıklamalar, role-collections); rol eklenirse güncelle.
+
 ## Dokümantasyon
 
 `docs/` altındaki dosyalar her aşamada güncellenir: `mimari.md`, `is-kurallari.md`, `cap-vs-rap.md`, `sozluk.md`,

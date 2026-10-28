@@ -34,6 +34,56 @@
             "url": ":memory:"
           }
         }
+      },
+      "auth": {
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "agent": {
+              "password": "agent",
+              "roles": [
+                "RentalAgent"
+              ]
+            },
+            "manager": {
+              "password": "manager",
+              "roles": [
+                "RentalAgent",
+                "RentalManager"
+              ]
+            },
+            "admin": {
+              "password": "admin",
+              "roles": [
+                "FleetAdmin"
+              ]
+            }
+          }
+        },
+        "[test]": {
+          "kind": "mocked",
+          "users": {
+            "agent": {
+              "password": "agent",
+              "roles": [
+                "RentalAgent"
+              ]
+            },
+            "manager": {
+              "password": "manager",
+              "roles": [
+                "RentalAgent",
+                "RentalManager"
+              ]
+            },
+            "admin": {
+              "password": "admin",
+              "roles": [
+                "FleetAdmin"
+              ]
+            }
+          }
+        }
       }
     }
   }

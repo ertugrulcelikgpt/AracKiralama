@@ -135,3 +135,18 @@ sequenceDiagram
 | `srv/rental-service.js` | K1–K8 kuralları ve 5 action (her kural ayrı fonksiyon); `calculatePrice` saf fonksiyon olarak dışa aktarılır |
 | `srv/field-control.cds` | `@UI.UpdateHidden` (K7), `@Common.SideEffects` (K5), `@Core.OperationAvailable` (action butonları) |
 | `_i18n/messages*.properties` | Hata ve bilgi mesajları (EN/TR) |
+
+## Yetkilendirme
+
+`srv/auth.cds`:
+
+| İşlem | RentalAgent | RentalManager (+ Agent) | FleetAdmin |
+|---|---|---|---|
+| RentalService okuma | ✅ | ✅ | ❌ 403 |
+| Kiralama oluşturma / düzenleme (draft) | ✅ | ✅ | ❌ |
+| Kaydedilmiş kiralamayı silme | ❌ 403 | ❌ 403 | ❌ |
+| `complete`, `cancel` | ✅ | ✅ | ❌ |
+| `approve`, `reject`, `applyDiscount` | ❌ 403 | ✅ | ❌ |
+| Müşteri ekleme / düzenleme | ✅ | ✅ | ❌ |
+| AdminService (araç, şube, ek hizmet) | ❌ 403 | ❌ 403 | ✅ |
+| Giriş yapılmamış | 401 | 401 | 401 |

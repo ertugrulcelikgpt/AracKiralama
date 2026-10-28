@@ -48,17 +48,26 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 | Klasör / Dosya | Amaç |
 |---|---|
 | `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
-| `srv/` | `rental-service.cds` + `rental-service.js` (iş kuralları), `field-control.cds`, `admin-service.cds` |
+| `srv/` | `rental-service.cds` + `rental-service.js` (iş kuralları), `field-control.cds`, `admin-service.cds`, `auth.cds` (yetkiler) |
 | `app/` | Fiori Elements arayüzleri ve UI anotasyonları |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
 | `test/` | `requests.http` örnek istekleri (ileride otomatik testler) |
+| `xs-security.json` | BTP XSUAA yetki yapılandırması taslağı (Aşama 10'da kullanılacak) |
 | `docs/` | Mimari, iş kuralları, CAP–RAP karşılaştırması, sözlük, öğrenme notları |
 | `docker-compose.yml` | Lokal PostgreSQL |
 | `.env.example` | Lokal ortam değişkenleri şablonu (`.env` commit edilmez) |
 
 ## Test kullanıcıları
 
-Aşama 4'te (yetkilendirme) eklenecek: `agent`, `manager`, `admin`.
+Lokalde CAP'in `mocked` kimlik doğrulaması kullanılır (tarayıcı kullanıcı adı/şifre sorar):
+
+| Kullanıcı / şifre | Roller | Yapabilecekleri |
+|---|---|---|
+| `agent` / `agent` | RentalAgent | Kiralama oluşturma/düzenleme, müşteri ekleme, tamamlama, iptal |
+| `manager` / `manager` | RentalAgent, RentalManager | Agent'ın her şeyi + onaylama, reddetme, indirim |
+| `admin` / `admin` | FleetAdmin | Sadece filo yönetimi (AdminService) |
+
+Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BTP için taslak: `xs-security.json`.
 
 ## Kullanılan teknolojiler
 
@@ -78,8 +87,8 @@ Aşama 4'te (yetkilendirme) eklenecek: `agent`, `manager`, `admin`.
 | 1 | Veri modeli ve örnek veri | ✅ |
 | 2 | Servisler | ✅ |
 | 3 | İş mantığı (K1–K8, action'lar) | ✅ |
-| 4 | Yetkilendirme | ⏳ |
-| 5 | Fiori Elements arayüzü | |
+| 4 | Yetkilendirme | ✅ |
+| 5 | Fiori Elements arayüzü | ⏳ |
 | 6 | Testler | |
 | 7 | Dokümantasyon ve gözden geçirme | |
 | 8 | S/4HANA Business Partner entegrasyonu | |
