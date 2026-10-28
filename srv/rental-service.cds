@@ -3,8 +3,12 @@ using {rentacar as db} from '../db/schema';
 // Şube çalışanlarının ve yöneticilerin kullandığı servis: kiralama kayıtları + value help için ana veriler.
 service RentalService @(path: '/rental') {
 
+  // canManage: kullanıcı RentalManager mı? Arayüzde yönetici butonlarını agent için pasif yapmak için (srv/rental-service.js)
   @odata.draft.enabled
-  entity Rentals           as projection on db.Rentals
+  entity Rentals           as projection on db.Rentals {
+    *,
+    virtual null as canManage : Boolean
+  }
     actions {
       action approve()                              returns Rentals;
       action reject(reason : String(255) @mandatory) returns Rentals;

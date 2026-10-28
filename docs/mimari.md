@@ -6,7 +6,7 @@
 
 | Katman | Klasör | İçerik |
 |---|---|---|
-| Arayüz (UI) | `app/` | SAP Fiori Elements (OData V4) uygulamaları |
+| Arayüz (UI) | `app/` | Fiori Elements (OData V4): `app/rentals` (Kiralama Yönetimi), `app/vehicles` (Filo Yönetimi), `app/index.html` (launchpad sandbox) |
 | Servis | `srv/` | CDS servis tanımları + JavaScript handler'ları (iş kuralları) |
 | Veri modeli | `db/` | CDS entity'leri, kod listeleri, örnek CSV verileri |
 | Veritabanı | — | PostgreSQL (lokal), SQLite (test), SAP HANA Cloud (production) |
@@ -150,3 +150,19 @@ sequenceDiagram
 | Müşteri ekleme / düzenleme | ✅ | ✅ | ❌ |
 | AdminService (araç, şube, ek hizmet) | ❌ 403 | ❌ 403 | ✅ |
 | Giriş yapılmamış | 401 | 401 | 401 |
+
+## Arayüz
+
+```mermaid
+flowchart LR
+  FLP["app/index.html<br/>Launchpad sandbox"] -->|Rentals-manage| R["app/rentals<br/>List Report + Object Page"]
+  FLP -->|Vehicles-manage| V["app/vehicles<br/>List Report + Object Page"]
+  R -->|OData V4 /rental| RS[RentalService]
+  V -->|OData V4 /admin| AS[AdminService]
+  UI5[(ui5.sap.com<br/>SAPUI5 1.153.0)] -.-> FLP & R & V
+```
+
+| Uygulama | Kullanıcı | Servis | Anotasyonlar |
+|---|---|---|---|
+| Kiralama Yönetimi | agent, manager | `/rental` | `app/rentals/annotations.cds`, `app/common.cds`, `srv/field-control.cds` |
+| Filo Yönetimi | admin | `/admin` | `app/vehicles/annotations.cds`, `app/common.cds` |

@@ -46,3 +46,14 @@
 | Scope / Role template / Role collection | XSUAA'da teknik yetki / scope grubu şablonu / kullanıcıya atanan rol paketi. |
 | JWT (JSON Web Token) | Kullanıcı kimliğini ve rollerini taşıyan imzalı token. |
 | DCL (Data Control Language) | RAP'te CDS view'lar için okuma yetkisi tanımlama dili (`define role`). |
+| Fiori Elements | Ekranı anotasyonlardan otomatik üreten SAP UI çatısı (OData V4 için `sap.fe`). |
+| SAPUI5 / UI5 | SAP'nin JavaScript UI kütüphanesi; Fiori Elements bunun üzerinde çalışır. |
+| Floorplan | Hazır sayfa düzeni: List Report, Object Page, Analytical List Page... |
+| List Report / Object Page | Filtre + tablo ekranı / tek kaydın başlık + bölümlerden oluşan detay ekranı. |
+| Facet | Object Page'deki bölüm (sekme). |
+| Value Help | Alan için seçim penceresi veya açılır liste (`@Common.ValueList`). |
+| Criticality | Değerin rengi/simgesi: 0 nötr, 1 kırmızı, 2 sarı, 3 yeşil, 5 mavi. |
+| manifest.json | UI5 uygulamasının tanım dosyası (servis, sayfalar, yönlendirme, launchpad bilgisi). |
+| Fiori Launchpad (FLP) | Uygulamaların kutucuk (tile) olarak sunulduğu giriş sayfası. Lokalde "sandbox". |
+| Semantic object / action | Launchpad'de bir uygulamayı adresleyen çift: `Rentals-manage`. |
+| Metadata Extension | RAP'te UI anotasyonlarının yazıldığı ayrı CDS nesnesi. |

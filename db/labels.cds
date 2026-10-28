@@ -4,6 +4,7 @@ using {rentacar} from './schema';
 annotate rentacar.Rentals with @title: '{i18n>Rental}' {
   ID              @title: '{i18n>RentalUUID}'  @UI.Hidden;
   rentalID        @title: '{i18n>RentalID}';
+  rentalNo        @title: '{i18n>RentalID}';
   customer        @title: '{i18n>Customer}';
   vehicle         @title: '{i18n>Vehicle}';
   pickupBranch    @title: '{i18n>PickupBranch}';
@@ -39,6 +40,7 @@ annotate rentacar.Vehicles with @title: '{i18n>Vehicle}' {
   plate        @title: '{i18n>Plate}';
   brand        @title: '{i18n>Brand}';
   model        @title: '{i18n>Model}';
+  displayName  @title: '{i18n>Vehicle}';
   modelYear    @title: '{i18n>ModelYear}';
   category     @title: '{i18n>VehicleCategory}';
   fuelType     @title: '{i18n>FuelType}';

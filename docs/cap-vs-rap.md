@@ -37,3 +37,8 @@
 | Okuma yetkisi / satır filtresi | `@restrict` + `where` | DCL (`define role ... grant select ... where`) |
 | Lokal test kullanıcıları | `mocked` auth, `package.json` kullanıcıları | Sistemde test kullanıcısı + PFCG rolü |
 | Bulut yetki yapılandırması | `xs-security.json` (XSUAA scope, role-template, role-collection) | IAM App + Business Catalog + Business Role (BTP ABAP Environment) |
+| UI | `@UI` anotasyonları (`app/*/annotations.cds`) | Metadata Extension (`annotate view ... with`, `@UI.lineItem` ...) |
+| Value help | `@Common.ValueList` / `@Common.ValueListWithFixedValues` | `@Consumption.valueHelpDefinition` |
+| Kod yerine metin | `@Common.Text` + `TextArrangement` | `@ObjectModel.text.element` / `text.association` |
+| Uygulama iskeleti | `webapp/manifest.json` + `Component.js` + `index.html` (elle) | Service Binding önizleme veya Fiori Tools generator |
+| Launchpad | `app/index.html` sandbox + `fioriSandboxAppConfig.json` | FLP: Business Catalog + Space/Page + Launchpad App Descriptor Item |

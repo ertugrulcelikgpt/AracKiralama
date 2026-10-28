@@ -1,0 +1,14 @@
+{
+  "tiles": [
+    {
+      "semanticObject": "Rentals",
+      "action": "manage",
+      "rootPath": "./rentals/webapp/"
+    },
+    {
+      "semanticObject": "Vehicles",
+      "action": "manage",
+      "rootPath": "./vehicles/webapp/"
+    }
+  ]
+}

@@ -202,6 +202,15 @@ export default class RentalService extends cds.ApplicationService {
 
     const readResult = ID => this.read(Rentals).where({ ID, IsActiveEntity: true }).then(r => r[0])
 
+    // Arayüz yönetici butonlarını bu alana göre aktif/pasif yapar; asıl yetki kontrolü srv/auth.cds'tedir.
+    // Sanal alan veritabanından gelmez; istemci $select ile istediyse (veya tüm alanları okuyorsa) doldurulur.
+    this.after('READ', Rentals, (rows, req) => {
+      const columns = req.query.SELECT?.columns
+      const requested = !columns || columns.some(c => c === '*' || c.ref?.[0] === 'canManage')
+      if (!requested) return
+      for (const row of [].concat(rows ?? [])) if (row) row.canManage = req.user.is('RentalManager')
+    })
+
     // =============================================================================================================
     // Taslak (draft) olayları: K5 anlık hesaplama, K6 fiyat kopyalama, K7 düzenleme kilidi
     // =============================================================================================================

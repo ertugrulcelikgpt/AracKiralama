@@ -18,6 +18,8 @@ using {
 @assert.unique: {rentalID: [rentalID]}
 entity Rentals : cuid, managed {
   rentalID        : Integer @readonly;
+  // Arayüzde numarayı binlik ayracı olmadan göstermek için metin karşılığı (app/common.cds → @Common.Text)
+  rentalNo        : String(10) = cast(rentalID as String(10));
   customer        : Association to Customers @mandatory;
   vehicle         : Association to Vehicles @mandatory;
   pickupBranch    : Association to Branches @mandatory;

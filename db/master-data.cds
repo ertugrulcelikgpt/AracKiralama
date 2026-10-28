@@ -21,7 +21,8 @@ entity Vehicles : cuid, managed {
   plate        : String(15) @mandatory;
   brand        : String(40) @mandatory;
   model        : String(40) @mandatory;
-  modelYear    : Integer;
+  displayName  : String(100) = brand || ' ' || model || ' (' || plate || ')';
+  modelYear    : String(4) @assert.format: '^[0-9]{4}$';
   category     : Association to VehicleCategories @mandatory;
   fuelType     : Association to FuelTypes;
   transmission : Association to TransmissionTypes;
@@ -37,7 +38,7 @@ entity Vehicles : cuid, managed {
 entity Customers : cuid, managed {
   firstName        : String(40) @mandatory;
   lastName         : String(40) @mandatory;
-  fullName         : String = firstName || ' ' || lastName;
+  fullName         : String(81) = firstName || ' ' || lastName;
   email            : String(100);
   phone            : String(30);
   birthDate        : Date;

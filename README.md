@@ -6,7 +6,16 @@ araç geri geldiğinde kiralama tamamlanır.
 
 Mimari, SAP'nin resmi örneği [SAP-samples/cap-sflight](https://github.com/SAP-samples/cap-sflight)'tan esinlenmiştir.
 
-> Ekran görüntüleri Aşama 5'te (Fiori arayüzü) eklenecek.
+| Kiralama listesi | Kiralama detayı (yönetici) |
+|---|---|
+| ![Kiralama listesi](docs/img/01-kiralama-listesi.png) | ![Kiralama detayı](docs/img/02-kiralama-detay-yonetici.png) |
+| **Taslakta ek hizmet, anlık fiyat** | **Kaydet'te iş kuralı hataları** |
+| ![Ek hizmet](docs/img/04-taslak-ek-hizmet.png) | ![Doğrulama hataları](docs/img/05-kaydet-dogrulama-hatalari.png) |
+| **Araç value help (sadece müsait)** | **Filo yönetimi** |
+| ![Araç seçimi](docs/img/07-arac-value-help.png) | ![Filo listesi](docs/img/08-filo-listesi.png) |
+
+Diğer ekranlar: [agent görünümü](docs/img/03-kiralama-detay-agent.png) · [km hatası](docs/img/06-tamamla-km-hatasi.png) ·
+[launchpad](docs/img/09-launchpad.png) · [İngilizce liste](docs/img/10-kiralama-listesi-en.png)
 
 ## Gereksinimler
 
@@ -22,6 +31,18 @@ npm run db:up                       # PostgreSQL container'ını başlat
 npm run db:deploy                   # şemayı ve örnek verileri yükle
 npm run watch                       # http://localhost:4004
 ```
+
+Tarayıcıda <http://localhost:4004> **Fiori Launchpad**'i açar (kullanıcı/şifre sorar, bkz. Test kullanıcıları).
+Dil için adrese `?sap-language=tr` veya `?sap-language=en` ekle.
+
+| Uygulama | Adres |
+|---|---|
+| Launchpad | http://localhost:4004/?sap-language=tr |
+| Kiralama Yönetimi | http://localhost:4004/rentals/webapp/index.html?sap-language=tr |
+| Filo Yönetimi | http://localhost:4004/vehicles/webapp/index.html?sap-language=tr |
+
+> Model (`.cds`) değiştiğinde `npm run db:deploy` çalıştır; `cds watch` PostgreSQL şemasını kendisi güncellemez.
+> `npm run db:reset` sonrası `cds watch`'ı yeniden başlat (veritabanı bağlantıları kopar).
 
 Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run db:down`.
 
@@ -49,7 +70,7 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 |---|---|
 | `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
 | `srv/` | `rental-service.cds` + `rental-service.js` (iş kuralları), `field-control.cds`, `admin-service.cds`, `auth.cds` (yetkiler) |
-| `app/` | Fiori Elements arayüzleri ve UI anotasyonları |
+| `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
 | `test/` | `requests.http` örnek istekleri (ileride otomatik testler) |
 | `xs-security.json` | BTP XSUAA yetki yapılandırması taslağı (Aşama 10'da kullanılacak) |
@@ -78,6 +99,7 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | `@cap-js/postgres` | 3.1.2 |
 | `@cap-js/sqlite` | 3.1.2 |
 | PostgreSQL | 16 |
+| SAPUI5 (CDN) | 1.153.0 |
 
 ## Yol haritası
 
@@ -88,8 +110,8 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | 2 | Servisler | ✅ |
 | 3 | İş mantığı (K1–K8, action'lar) | ✅ |
 | 4 | Yetkilendirme | ✅ |
-| 5 | Fiori Elements arayüzü | ⏳ |
-| 6 | Testler | |
+| 5 | Fiori Elements arayüzü | ✅ |
+| 6 | Testler | ⏳ |
 | 7 | Dokümantasyon ve gözden geçirme | |
 | 8 | S/4HANA Business Partner entegrasyonu | |
 | 9 | (Opsiyonel) Analitik | |

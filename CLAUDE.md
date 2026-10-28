@@ -59,6 +59,14 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 - Mock kullanıcılar (`package.json`, development + test): agent/agent, manager/manager, admin/admin.
 - `xs-security.json` elle düzenlendi (açıklamalar, role-collections); rol eklenirse güncelle.
 
+## Arayüz
+
+- Fiori Elements uygulamaları `app/rentals`, `app/vehicles`; UI5 `https://ui5.sap.com/1.153.0/` CDN'inden.
+- Anotasyonlar: `app/common.cds` (ortak), `app/<uygulama>/annotations.cds`, dinamik davranış `srv/field-control.cds`.
+- Model değişince `npm run db:deploy`; `db:reset` sonrası `cds watch` yeniden başlatılmalı.
+- Bulut oturumunda ui5.sap.com ağ politikasıyla engelli olabilir. Ekran testi için UI5 Tooling (`ui5 serve`, SAPUI5
+  npm'den) + Playwright'ta `ui5.sap.com/1.153.0/**` isteklerini yerel sunucuya yönlendirmek işe yarar.
+
 ## Dokümantasyon
 
 `docs/` altındaki dosyalar her aşamada güncellenir: `mimari.md`, `is-kurallari.md`, `cap-vs-rap.md`, `sozluk.md`,

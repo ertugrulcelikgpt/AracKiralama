@@ -13,9 +13,9 @@ dosyalarındaki anahtarlarla verilir ve isteğin diline (TR/EN) göre çevrilir.
 | K2 | Aynı araç için O/A statüsünde, tarih aralığı kesişen başka kiralama varsa engellenir; çakışan kiralama numarası mesajda yazar | Kaydet | `srv/rental-service.js:75` `checkAvailability` | `RENTAL_VEHICLE_NOT_AVAILABLE` |
 | K3 | MT (bakımda) veya RT (hizmet dışı) araç kiralanamaz | Kaydet | `srv/rental-service.js:96` `checkVehicleStatus` | `RENTAL_VEHICLE_BLOCKED` |
 | K4 | Teslim tarihindeki yaş ≥ kategori `minDriverAge`, ehliyet süresi ≥ `minLicenseYears` | Kaydet | `srv/rental-service.js:104` `checkDriverEligibility` | `RENTAL_DRIVER_TOO_YOUNG`, `RENTAL_LICENSE_TOO_NEW`, `RENTAL_CUSTOMER_DATA_MISSING` |
-| K5 | Fiyat: gün, temel ücret, ek hizmet, farklı şubeye iade (750 TL), uzun süre indirimi (7–13 gün %10, 14+ gün %15), toplam | Taslakta her ilgili alan değişikliğinde + Kaydet | `srv/rental-service.js:35` `calculatePrice` (saf fonksiyon), `:170` `recalculateDraft`, `:209` PATCH işleyicisi | — |
+| K5 | Fiyat: gün, temel ücret, ek hizmet, farklı şubeye iade (750 TL), uzun süre indirimi (7–13 gün %10, 14+ gün %15), toplam | Taslakta her ilgili alan değişikliğinde + Kaydet | `srv/rental-service.js:35` `calculatePrice` (saf fonksiyon), `:170` `recalculateDraft`, `:218` PATCH işleyicisi | — |
 | K6 | Ek hizmetin günlük ücreti kopyalanır; aynı ek hizmet iki kez eklenemez; adet 1–3 | Satır eklenince/değişince (kopyalama), Kaydet (kontrol) | `srv/rental-service.js:125` `copyExtraPrice`, `:134` `checkExtras` | `RENTAL_EXTRA_DUPLICATE`, `RENTAL_EXTRA_QUANTITY` |
-| K7 | Sadece O (Açık) kiralamalar düzenlenebilir | "Düzenle" (EDIT) | `srv/rental-service.js:235`; buton: `srv/field-control.cds:9` `@UI.UpdateHidden` | `RENTAL_NOT_EDITABLE` |
+| K7 | Sadece O (Açık) kiralamalar düzenlenebilir | "Düzenle" (EDIT) | `srv/rental-service.js:244`; buton: `srv/field-control.cds:12` `@UI.UpdateHidden` | `RENTAL_NOT_EDITABLE` |
 | K8 | Yeni kayıtta `rentalID = max + 1` (ilk numara 1000) | Kaydet (sadece yeni kayıt) | `srv/rental-service.js:152` `nextRentalID`; güvence: `db/schema.cds:18` `@assert.unique` | — |
 
 Birden fazla kural aynı anda ihlal edilirse (ör. K1 + K3 + K4) hepsi tek yanıtta döner, çünkü kontroller
@@ -25,15 +25,16 @@ Birden fazla kural aynı anda ihlal edilirse (ör. K1 + K3 + K4) hepsi tek yanı
 
 | Action | Kim (`srv/auth.cds`) | Ön koşul | Etki | Kodda | Hata anahtarları |
 |---|---|---|---|---|---|
-| `approve()` | Manager | status = O | status → A, `pickupKm` = aracın km'si | `srv/rental-service.js:268` | `APPROVE_NOT_OPEN` |
-| `reject(reason)` | Manager | status = O, sebep zorunlu | status → R, `rejectionReason` dolar | `:276` | `REJECT_NOT_OPEN`, `REJECT_REASON_REQUIRED` |
-| `complete(returnKm)` | Agent, Manager | status = A, `returnKm` ≥ aracın km'si | status → C, aracın `mileage` değeri güncellenir | `:285` | `COMPLETE_NOT_APPROVED`, `COMPLETE_KM_INVALID` |
-| `cancel()` | Agent, Manager | status ∈ {O, A} | status → X | `:298` | `CANCEL_NOT_ALLOWED` |
-| `applyDiscount(percent)` | Manager | status = O, 1 ≤ percent ≤ 30 | `discountPercent` saklanır, fiyat yeniden hesaplanır | `:305` | `DISCOUNT_NOT_OPEN`, `DISCOUNT_PERCENT_INVALID`, bilgi: `DISCOUNT_CAPPED` |
+| `approve()` | Manager | status = O | status → A, `pickupKm` = aracın km'si | `srv/rental-service.js:277` | `APPROVE_NOT_OPEN` |
+| `reject(reason)` | Manager | status = O, sebep zorunlu | status → R, `rejectionReason` dolar | `:285` | `REJECT_NOT_OPEN`, `REJECT_REASON_REQUIRED` |
+| `complete(returnKm)` | Agent, Manager | status = A, `returnKm` ≥ aracın km'si | status → C, aracın `mileage` değeri güncellenir | `:294` | `COMPLETE_NOT_APPROVED`, `COMPLETE_KM_INVALID` |
+| `cancel()` | Agent, Manager | status ∈ {O, A} | status → X | `:307` | `CANCEL_NOT_ALLOWED` |
+| `applyDiscount(percent)` | Manager | status = O, 1 ≤ percent ≤ 30 | `discountPercent` saklanır, fiyat yeniden hesaplanır | `:314` | `DISCOUNT_NOT_OPEN`, `DISCOUNT_PERCENT_INVALID`, bilgi: `DISCOUNT_CAPPED` |
 
 - Action'lar sadece kaydedilmiş kiralamalarda çalışır. Taslak üzerinde çağrılırsa `ACTION_ONLY_ACTIVE`
-  döner (`:266`).
-- Butonların aktif/pasif durumu `@Core.OperationAvailable` ile verilir (`srv/field-control.cds:43–85`).
+  döner (`:275`).
+- Butonların aktif/pasif durumu `@Core.OperationAvailable` ile verilir; yönetici action'ları ayrıca `canManage`
+  (kullanıcı RentalManager mı?) alanına bakar (`srv/field-control.cds:46–107`).
 
 ## K8 – Eşzamanlı numara üretimi
 
