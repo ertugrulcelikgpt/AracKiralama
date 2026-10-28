@@ -12,6 +12,8 @@ Bu dosya, projeyi devralan bir Claude oturumu için özet, komutlar ve kurallard
 - PR açıklamalarına "Generated with Claude Code" veya benzeri atıf satırı **ekleme**.
 - Amaç: GitHub Contributors listesinde yalnızca repo sahibi görünmeli.
 - Geliştirme dalı: `tryfirst`. Her aşama sonunda anlamlı bir commit (ör. `feat(db): add rental domain model`).
+- Her aşama sonunda `tryfirst`'i push'la ve `main`'e birleştir (`git merge --ff-only`), sonra `main`'i push'la.
+  PR açılmaz; repo tek kişilik.
 
 ## Proje özeti
 
