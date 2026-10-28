@@ -119,9 +119,19 @@ sequenceDiagram
   U->>F: alan değiştir
   F->>S: PATCH Rentals(...,IsActiveEntity=false)
   S->>D: sadece taslak satırı güncelle
+  S->>D: after('PATCH'): K5 fiyatı yeniden hesapla, taslağa yaz
+  F->>S: GET fiyat alanları (@Common.SideEffects)
   U->>F: "Kaydet"
   F->>S: POST Rentals(...,IsActiveEntity=false)/draftActivate
-  S->>S: doğrulamalar (@mandatory, Aşama 3'te K1–K8)
+  S->>S: before('SAVE'): K1–K4, K6 doğrulama, K5 fiyat, K8 numara
   S->>D: rentacar_rentals'a yaz, taslağı sil
   S-->>F: aktif kayıt (IsActiveEntity=true)
 ```
+
+## İş mantığı dosyaları
+
+| Dosya | İçerik |
+|---|---|
+| `srv/rental-service.js` | K1–K8 kuralları ve 5 action (her kural ayrı fonksiyon); `calculatePrice` saf fonksiyon olarak dışa aktarılır |
+| `srv/field-control.cds` | `@UI.UpdateHidden` (K7), `@Common.SideEffects` (K5), `@Core.OperationAvailable` (action butonları) |
+| `_i18n/messages*.properties` | Hata ve bilgi mesajları (EN/TR) |

@@ -31,3 +31,11 @@
 | IsActiveEntity | Draft entity'lerde anahtarın parçası: `true` aktif kayıt, `false` taslak. |
 | DraftAdministrativeData | Taslağın kimin tarafından ne zaman oluşturulduğu ve kimde kilitli olduğu bilgisi. |
 | Service Definition / Binding | RAP'te hangi entity'lerin yayınlandığı (definition) ve hangi protokolle (binding). |
+| Event handler (olay işleyici) | `before` / `on` / `after` fazlarında bir olaya (`SAVE`, `PATCH`, `approve`...) bağlanan fonksiyon. |
+| CQL (CDS Query Language) | CAP'in veritabanından bağımsız sorgu dili: `SELECT.from(...)`, `UPDATE(...)`, `INSERT.into(...)`. |
+| Bound action | Bir entity kaydına bağlı işlem: `Rentals(...)/RentalService.approve`. |
+| Side Effects | Fiori'ye "şu alan değişince şu alanları yeniden oku" diyen anotasyon (`@Common.SideEffects`). |
+| `@Core.OperationAvailable` | Bir action butonunun hangi koşulda aktif olacağını tanımlayan anotasyon. |
+| `req.error` / `req.reject` | Hata biriktirme / işlemi hemen durdurma. |
+| BDEF (Behavior Definition) | RAP'te bir iş nesnesinin davranışını (CRUD, action, validation, determination) bildiren nesne. |
+| EML (Entity Manipulation Language) | RAP'te iş nesnesini okuma/değiştirme dili: `READ ENTITIES`, `MODIFY ENTITIES`. |

@@ -33,6 +33,7 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 | `AdminService` | http://localhost:4004/admin | Araçlar (draft), şubeler, ek hizmetler, kategoriler |
 
 Örnek istekler: [`test/requests.http`](test/requests.http) (VS Code REST Client eklentisi).
+İş kuralları ve action'lar: [`docs/is-kurallari.md`](docs/is-kurallari.md).
 
 ## Veritabanı profilleri
 
@@ -47,7 +48,7 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 | Klasör / Dosya | Amaç |
 |---|---|
 | `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
-| `srv/` | `rental-service.cds`, `admin-service.cds` (+ Aşama 3'te iş mantığı `.js`) |
+| `srv/` | `rental-service.cds` + `rental-service.js` (iş kuralları), `field-control.cds`, `admin-service.cds` |
 | `app/` | Fiori Elements arayüzleri ve UI anotasyonları |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
 | `test/` | `requests.http` örnek istekleri (ileride otomatik testler) |
@@ -76,8 +77,8 @@ Aşama 4'te (yetkilendirme) eklenecek: `agent`, `manager`, `admin`.
 | 0 | Ortam ve iskelet (CAP, PostgreSQL, profiller) | ✅ |
 | 1 | Veri modeli ve örnek veri | ✅ |
 | 2 | Servisler | ✅ |
-| 3 | İş mantığı (K1–K8, action'lar) | ⏳ |
-| 4 | Yetkilendirme | |
+| 3 | İş mantığı (K1–K8, action'lar) | ✅ |
+| 4 | Yetkilendirme | ⏳ |
 | 5 | Fiori Elements arayüzü | |
 | 6 | Testler | |
 | 7 | Dokümantasyon ve gözden geçirme | |

@@ -123,3 +123,83 @@ Content-Type: application/json
 
 ### AdminService: araç listesi
 GET {{server}}/admin/Vehicles?$select=plate,brand,model,status_code&$filter=status_code eq 'MT'
+
+############################################################
+# 5) İş kuralları (Aşama 3) — hatalı durumlar "Kaydet"te döner
+############################################################
+# Not: Kaydet hatalarını görmek için 3) Draft akışındaki a) ile taslak oluştur, c) adımındaki gövdeyi
+# aşağıdaki örneklerden biriyle değiştir ve e) draftActivate'i çalıştır.
+#
+# K1  iade < teslim      : "pickupDate":"2026-12-10","returnDate":"2026-12-09"
+# K1  geçmiş teslim       : "pickupDate":"2026-10-01","returnDate":"2026-10-05"
+# K2  çakışma (1007 ile) : "vehicle_ID":"a1000000-0000-4000-8000-000000000008","pickupDate":"2026-11-04","returnDate":"2026-11-06"
+# K3  bakımdaki araç      : "vehicle_ID":"a1000000-0000-4000-8000-000000000006"
+# K4  20 yaşında müşteri  : "customer_ID":"c1000000-0000-4000-8000-000000000011" (+ ECO araç a1...01)
+# K4  ehliyeti 1 yıllık   : "customer_ID":"c1000000-0000-4000-8000-000000000012" (+ SUV araç a1...13)
+# K6  aynı ek hizmet iki kez veya "quantity": 4
+
+### Hata mesajlarını İngilizce görmek için
+POST {{server}}/rental/Rentals(ID={{newDraft.response.body.ID}},IsActiveEntity=false)/RentalService.draftActivate
+Authorization: {{auth}}
+Accept-Language: en
+Content-Type: application/json
+
+{}
+
+############################################################
+# 6) Action'lar (sadece kaydedilmiş kiralamalarda)
+############################################################
+@open1007 = b1000000-0000-4000-8000-000000000008
+@open1008 = b1000000-0000-4000-8000-000000000009
+@open1009 = b1000000-0000-4000-8000-000000000010
+@appr1004 = b1000000-0000-4000-8000-000000000005
+@done1000 = b1000000-0000-4000-8000-000000000001
+
+### approve: O → A (pickupKm doldurulur)
+POST {{server}}/rental/Rentals(ID={{open1007}},IsActiveEntity=true)/RentalService.approve
+Authorization: {{auth}}
+Content-Type: application/json
+
+{}
+
+### reject: sebep zorunlu
+POST {{server}}/rental/Rentals(ID={{open1009}},IsActiveEntity=true)/RentalService.reject
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "reason": "Müşteri belgelerini teslim etmedi." }
+
+### complete: düşük km → COMPLETE_KM_INVALID
+POST {{server}}/rental/Rentals(ID={{appr1004}},IsActiveEntity=true)/RentalService.complete
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "returnKm": 1000 }
+
+### complete: A → C, aracın km'si güncellenir
+POST {{server}}/rental/Rentals(ID={{appr1004}},IsActiveEntity=true)/RentalService.complete
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "returnKm": 23000 }
+
+### cancel: tamamlanmış kiralama iptal edilemez → CANCEL_NOT_ALLOWED
+POST {{server}}/rental/Rentals(ID={{done1000}},IsActiveEntity=true)/RentalService.cancel
+Authorization: {{auth}}
+Content-Type: application/json
+
+{}
+
+### applyDiscount: 14 günlük kiralamada %15 uzun süre indirimi var; %20 istenirse %15'e kırpılır (sap-messages)
+POST {{server}}/rental/Rentals(ID={{open1008}},IsActiveEntity=true)/RentalService.applyDiscount
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "percent": 20 }
+
+### K7: onaylanmış kiralama düzenlemeye açılamaz → RENTAL_NOT_EDITABLE
+POST {{server}}/rental/Rentals(ID={{appr1004}},IsActiveEntity=true)/RentalService.draftEdit
+Authorization: {{auth}}
+Content-Type: application/json
+
+{ "PreserveChanges": true }

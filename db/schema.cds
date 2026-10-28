@@ -13,7 +13,9 @@ using {
   rentacar.RentalStatus
 } from './master-data';
 
-// Fiyat alanları ve rentalID istemciden yazılamaz (@readonly); değerlerini Aşama 3'teki handler'lar hesaplar.
+// Fiyat alanları ve rentalID istemciden yazılamaz (@readonly); değerlerini srv/rental-service.js hesaplar.
+// UNIQUE kısıtı K8'deki numara üretiminin son güvencesidir: eşzamanlı iki kayıt aynı numarayı alamaz.
+@assert.unique: {rentalID: [rentalID]}
 entity Rentals : cuid, managed {
   rentalID        : Integer @readonly;
   customer        : Association to Customers @mandatory;

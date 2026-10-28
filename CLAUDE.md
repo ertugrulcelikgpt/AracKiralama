@@ -44,6 +44,15 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 - Örnek verilerdeki kişi bilgileri tamamen uydurma.
 - API anahtarlarını (ör. `BP_API_KEY`) asla koda, loga veya commit'e koyma.
 
+## İş mantığı notları
+
+- Kurallar `srv/rental-service.js`'te, her biri ayrı fonksiyon (K1–K8); `docs/is-kurallari.md`'deki dosya:satır
+  referanslarını kod değişince güncelle.
+- Doğrulama `before('SAVE')`'de (hedefler `in/...`), fiyat hesaplama taslak `PATCH`'inde. Action'lar sadece aktif kayıtta.
+- `reject` action adı `ApplicationService.reject` ile çakıştığı için CAP başlangıçta uyarı verir; isim prompt
+  gereği bilinçli olarak korunuyor, action çalışıyor.
+- `sap-messages` bilgi mesajları `cds.i18n.messages.at(key, req.locale, args)` ile çevrilir.
+
 ## Dokümantasyon
 
 `docs/` altındaki dosyalar her aşamada güncellenir: `mimari.md`, `is-kurallari.md`, `cap-vs-rap.md`, `sozluk.md`,

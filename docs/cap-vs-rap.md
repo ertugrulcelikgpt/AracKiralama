@@ -22,3 +22,13 @@
 | Draft | `@odata.draft.enabled` + `_drafts` tablosu | `with draft;` + `draft table zrent_d_rental` |
 | Taslak aksiyonları | `draftEdit`, `draftActivate`, taslağı DELETE | `draft action Edit / Activate / Discard / Resume` |
 | Kilit | `DraftAdministrativeData.InProcessByUser` | `lock master` + taslak kilidi (exclusive lock) |
+| İş mantığı | `srv/rental-service.js` (`cds.ApplicationService` sınıfı, handler'lar) | Behavior Definition (BDEF) + Behavior Implementation sınıfı |
+| Validasyon (K1–K4, K6) | `before('SAVE')` + `req.error({ target: 'in/...' })` | `validation ... on save` + `failed` / `reported` |
+| Hesaplama (K5) | `after('PATCH')` handler + `@Common.SideEffects` | `determination ... on modify` + `side effects` |
+| Action'lar | `action approve() returns Rentals` + `this.on('approve')` | `action approve result [1] $self;` + action metodu |
+| Dinamik buton | `@Core.OperationAvailable` (`$edmJson` ifadesi) | `features : instance` (`get_instance_features`) |
+| Düzenleme kilidi (K7) | `@UI.UpdateHidden` + `before('EDIT')` | `%update` instance feature (`fc-o-disabled`) |
+| Numara üretimi (K8) | Kaydet'te `max + 1` + `@assert.unique` | `early` / `late numbering` veya number range object |
+| Veri erişimi | CQL (`SELECT.from(...)`, `UPDATE(...)`) | EML (`READ ENTITIES`, `MODIFY ENTITIES`) |
+| Hata mesajları | `_i18n/messages*.properties` + `req.error('KEY')` | Mesaj sınıfı (SE91 / ADT) + `new_message( id number )` |
+| Transaction | Her istek otomatik bir transaction | RAP LUW: interaction phase + save sequence |
