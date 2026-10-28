@@ -45,6 +45,12 @@ entity Customers : cuid, managed {
   licenseNumber    : String(20);
   licenseIssueDate : Date;
   city             : String(40);
+  // S/4HANA'dan içe aktarılan müşteride Business Partner numarası; kaynak LOCAL (elle) veya S4 (importFromS4)
+  businessPartnerID : String(10) @readonly;
+  source            : String(5) @readonly enum {
+    LOCAL;
+    S4;
+  } default 'LOCAL';
 }
 
 entity Extras {

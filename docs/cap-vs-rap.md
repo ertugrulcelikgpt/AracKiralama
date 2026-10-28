@@ -73,7 +73,11 @@ Aşağıdaki tablo bu projedeki her yapının RAP karşılığını verir. RAP k
 ### Entegrasyon ve test
 | Konu | Bu projede (CAP) | ABAP RAP karşılığı |
 |---|---|---|
-| Uzak API tüketimi | `cds import` + remote service (Aşama 8'de) | Service Consumption Model (EDMX'ten proxy üretimi) |
+| Uzak API tüketimi | `cds import` (EDMX → CSN) + `cds.connect.to('API_BUSINESS_PARTNER')` | Service Consumption Model (EDMX → proxy) + `/iwbep/cl_cp_factory_remote` |
+| Uzak veriyi yayınlamak | Uzak entity'nin projeksiyonu + `on('READ')` → `bupa.run(req.query)` | Custom entity + query provider (`if_rap_query_provider`) |
+| Bağlantı bilgisi | `cds.requires` credentials: mock / sandbox (`APIKey`) / Destination | Communication Scenario + Communication Arrangement |
+| Uzak servisi taklit etmek | `--with-mocks` + `srv/external/data/*.csv` | ABAP Unit'te proxy için test double |
+| Servis düzeyi işlem | Unbound action `importFromS4` | `static action` |
 | Test | `cds.test` + Mocha: gerçek OData istekleriyle entegrasyon testi, bellek içi SQLite | ABAP Unit (`FOR TESTING`) + test double'lar (`cl_botd_txbufdbl_bo_test_env`, `cl_osql_test_environment`) |
 
 ## Hangi senaryoda CAP, hangisinde RAP?
@@ -95,8 +99,9 @@ Aşağıdaki tablo bu projedeki her yapının RAP karşılığını verir. RAP k
 - Çok kiracılı (multitenant) SaaS uygulaması geliştirilecekse.
 
 **Bu proje için:** Araç kiralama, S/4HANA'nın standart süreçlerinden bağımsız, kendi verisi olan bir uygulama;
-müşteri verisini S/4'ten okuyor (Aşama 8). Bu, CAP için tipik bir side-by-side senaryodur. Kiralama doğrudan
-S/4HANA'daki bir standart belgeye (ör. satış siparişi) bağlansaydı RAP daha doğal olurdu.
+müşteri verisini S/4'ten içe aktarıyor (Aşama 8, [`s4-entegrasyonu.md`](s4-entegrasyonu.md)). Bu, CAP için tipik
+bir side-by-side senaryodur. Kiralama doğrudan S/4HANA'daki bir standart belgeye (ör. satış siparişi) bağlansaydı
+RAP daha doğal olurdu.
 
 ## RAP'i ücretsiz denemek
 

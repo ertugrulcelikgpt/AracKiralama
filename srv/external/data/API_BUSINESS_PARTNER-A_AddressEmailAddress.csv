@@ -1,0 +1,13 @@
+AddressID;Person;OrdinalNumber;EmailAddress;IsDefaultEmailAddress
+A101;P101;1;s4.ornek1@example.com;true
+A102;P102;1;s4.ornek2@example.com;true
+A103;P103;1;s4.ornek3@example.com;true
+A104;P104;1;s4.ornek4@example.com;true
+A105;P105;1;s4.ornek5@example.com;true
+A106;P106;1;s4.ornek6@example.com;true
+A107;P107;1;s4.ornek7@example.com;true
+A108;P108;1;s4.ornek8@example.com;true
+A109;P109;1;s4.ornek9@example.com;true
+A110;P110;1;s4.ornek10@example.com;true
+A201;P201;1;s4.ornek11@example.com;true
+A202;P202;1;s4.ornek12@example.com;true

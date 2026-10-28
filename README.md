@@ -13,9 +13,12 @@ Mimari, SAP'nin resmi örneği [SAP-samples/cap-sflight](https://github.com/SAP-
 | ![Ek hizmet](docs/img/04-taslak-ek-hizmet.png) | ![Doğrulama hataları](docs/img/05-kaydet-dogrulama-hatalari.png) |
 | **Araç value help (sadece müsait)** | **Filo yönetimi** |
 | ![Araç seçimi](docs/img/07-arac-value-help.png) | ![Filo listesi](docs/img/08-filo-listesi.png) |
+| **S/4HANA'dan Getir: iş ortağı seçimi** | **İçe aktarılan müşteri (Kaynak = S4)** |
+| ![İş ortağı value help](docs/img/11-bp-value-help.png) | ![Müşteriler](docs/img/12-musteri-listesi-s4.png) |
 
 Diğer ekranlar: [agent görünümü](docs/img/03-kiralama-detay-agent.png) · [km hatası](docs/img/06-tamamla-km-hatasi.png) ·
-[launchpad](docs/img/09-launchpad.png) · [İngilizce liste](docs/img/10-kiralama-listesi-en.png)
+[launchpad](docs/img/09-launchpad.png) · [İngilizce liste](docs/img/10-kiralama-listesi-en.png) ·
+[S/4 kurum hatası](docs/img/13-s4-kurum-hatasi.png)
 
 ## Gereksinimler
 
@@ -40,29 +43,44 @@ Dil için adrese `?sap-language=tr` veya `?sap-language=en` ekle.
 | Launchpad | http://localhost:4004/?sap-language=tr |
 | Kiralama Yönetimi | http://localhost:4004/rentals/webapp/index.html?sap-language=tr |
 | Filo Yönetimi | http://localhost:4004/vehicles/webapp/index.html?sap-language=tr |
+| Müşteriler (S/4HANA'dan Getir) | http://localhost:4004/customers/webapp/index.html?sap-language=tr |
 
 > Model (`.cds`) değiştiğinde `npm run db:deploy` çalıştır; `cds watch` PostgreSQL şemasını kendisi güncellemez.
 > `npm run db:reset` sonrası `cds watch`'ı yeniden başlat (veritabanı bağlantıları kopar).
 
 Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run db:down`.
 
+## S/4HANA entegrasyonu
+
+Müşteriler S/4HANA'nın Business Partner API'sinden içe aktarılabilir. Üç mod vardır, kod değişmez:
+
+| Mod | Komut | S/4 verisi |
+|---|---|---|
+| Mock (varsayılan) | `npm run watch` | `srv/external/data/*.csv` (10 kişi, 2 kurum); internet gerekmez |
+| SAP sandbox | `npm run sandbox` | `sandbox.api.sap.com`; `.env`'de `BP_API_KEY` gerekir |
+| Production | BTP Destination (Aşama 10) | Gerçek S/4HANA |
+
+Sandbox için api.sap.com'dan aldığın anahtarı **sadece** `.env` dosyasına yaz (`BP_API_KEY=...`). `.env`'i asla
+commit'leme veya GitHub web arayüzüyle yükleme. Ayrıntı: [`docs/s4-entegrasyonu.md`](docs/s4-entegrasyonu.md).
+
 ## Testler
 
 ```powershell
-npm test            # 92 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
+npm test            # 109 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
 npm run test:pg     # aynı testler PostgreSQL'e karşı (ayrı rentacar_test veritabanı; önce npm run db:up)
 npm test -- --grep K2   # sadece adında "K2" geçen testler
 ```
 
 Kapsam: K1–K8 iş kuralları (başarılı ve hatalı durumlar), 5 action'ın ön koşulları, yetki (401/403), fiyat
-senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı, ana veri silme koruması. Ayrıntı ve SQLite–PostgreSQL farkları:
+senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı, ana veri silme koruması, S/4HANA okuma ve içe
+aktarma (mock modunda; internet ve API anahtarı gerekmez). Ayrıntı ve SQLite–PostgreSQL farkları:
 [`docs/ogrenme-notlari/07-testler.md`](docs/ogrenme-notlari/07-testler.md).
 
 ## Servisler
 
 | Servis | URL | İçerik |
 |---|---|---|
-| `RentalService` | http://localhost:4004/rental | Kiralamalar (draft), müşteriler, value help verileri |
+| `RentalService` | http://localhost:4004/rental | Kiralamalar (draft), müşteriler, value help verileri, S/4 iş ortakları (`S4BusinessPartners`), `importFromS4` |
 | `AdminService` | http://localhost:4004/admin | Araçlar (draft), şubeler, ek hizmetler, kategoriler |
 
 Örnek istekler: [`test/requests.http`](test/requests.http) (VS Code REST Client eklentisi).
@@ -75,14 +93,16 @@ senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı, ana veri s
 | `development` (varsayılan) | PostgreSQL 16 (Docker) | `cds watch`, `cds deploy` |
 | `test` | SQLite, bellek içi | `npm test` |
 | `production` | SAP HANA Cloud | BTP deploy (Aşama 10) |
+| `sandbox` (ek profil) | PostgreSQL (development ile birlikte) | `npm run sandbox`: S/4 olarak SAP sandbox'ı kullanılır |
 
 ## Proje yapısı
 
 | Klasör / Dosya | Amaç |
 |---|---|
 | `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
-| `srv/` | `rental-service.cds/.js` (kiralama, iş kuralları), `admin-service.cds/.js` (filo, silme koruması), `field-control.cds`, `auth.cds` (yetkiler) |
-| `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
+| `srv/` | `rental-service.cds/.js` (kiralama, iş kuralları, S/4 entegrasyonu), `admin-service.cds/.js` (filo, silme koruması), `field-control.cds`, `auth.cds` (yetkiler) |
+| `srv/external/` | S/4HANA Business Partner API modeli (`cds import`) ve mock verileri (`data/*.csv`) |
+| `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`, `customers`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
 | `test/` | Otomatik testler (`*.test.js`, Mocha + `@cap-js/cds-test`), `requests.http` örnek istekleri |
 | `xs-security.json` | BTP XSUAA yetki yapılandırması taslağı (Aşama 10'da kullanılacak) |
@@ -96,7 +116,7 @@ Lokalde CAP'in `mocked` kimlik doğrulaması kullanılır (tarayıcı kullanıc�
 
 | Kullanıcı / şifre | Roller | Yapabilecekleri |
 |---|---|---|
-| `agent` / `agent` | RentalAgent | Kiralama oluşturma/düzenleme, müşteri ekleme, tamamlama, iptal |
+| `agent` / `agent` | RentalAgent | Kiralama oluşturma/düzenleme, müşteri ekleme, S/4'ten müşteri getirme, tamamlama, iptal |
 | `manager` / `manager` | RentalAgent, RentalManager | Agent'ın her şeyi + onaylama, reddetme, indirim |
 | `admin` / `admin` | FleetAdmin | Sadece filo yönetimi (AdminService) |
 
@@ -114,6 +134,9 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | Arayüz boş kalıyor veya yüklenmiyor | UI5, `ui5.sap.com`'dan yüklenir; internet veya kurumsal proxy engeli | `https://ui5.sap.com/1.153.0/resources/sap-ui-version.json` tarayıcıda açılıyor mu bak |
 | Hep aynı kullanıcıyla giriliyor | Tarayıcı Basic Auth bilgisini hatırlar | Başka kullanıcı için gizli pencere aç |
 | `npm run test:pg`: "ECONNREFUSED" | PostgreSQL ayakta değil | `npm run db:up` |
+| S/4'ten Getir: "S/4HANA erişimi reddedildi (401/403)" | `BP_API_KEY` yok, yanlış veya yenilenmiş | `.env`'deki anahtarı kontrol et, `npm run sandbox`'ı yeniden başlat |
+| S/4'ten Getir: "S/4HANA sistemine şu anda ulaşılamıyor" | İnternet/proxy engeli veya sandbox 10 sn'de yanıt vermedi | `https://sandbox.api.sap.com` erişilebilir mi bak; mock modunda (`npm run watch`) çalış |
+| S/4 iş ortakları açılmıyor: `relation "api_business_partner_..." does not exist` | Mock tabloları yüklenmedi | `npm run db:deploy` (`--with-mocks` ile S/4 mock tablolarını da kurar) |
 
 ## Kullanılan teknolojiler
 
@@ -139,7 +162,7 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | 5 | Fiori Elements arayüzü | ✅ |
 | 6 | Testler | ✅ |
 | 7 | Dokümantasyon ve gözden geçirme | ✅ |
-| 8 | S/4HANA Business Partner entegrasyonu | ⏳ |
+| 8 | S/4HANA Business Partner entegrasyonu | ✅ |
 | 9 | (Opsiyonel) Analitik | |
 | 10 | BTP deploy hazırlığı (SAP HANA Cloud) | |
 
@@ -150,5 +173,6 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | [Mimari](docs/mimari.md) | Katmanlar, veri modeli (ER diyagramı), istek akışı, yetki tablosu, testler |
 | [İş kuralları](docs/is-kurallari.md) | K1–K8, action'lar, silme koruması; her kuralın kodda ve testte yeri |
 | [CAP vs RAP](docs/cap-vs-rap.md) | Bu projedeki her yapının ABAP RAP karşılığı, hangisi ne zaman, RAP'i deneme yolları |
+| [S/4HANA entegrasyonu](docs/s4-entegrasyonu.md) | Mimari, mock/sandbox/destination modları, V2 → V4, hata yönetimi, Cloud Connector |
 | [Sözlük](docs/sozluk.md) | SAP/CAP terimleri (Türkçe) |
 | [Öğrenme notları](docs/ogrenme-notlari/README.md) | Her aşamanın kavramları, RAP karşılığı, sık hatalar ve alıştırmalar |

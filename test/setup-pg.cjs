@@ -30,6 +30,6 @@ exports.mochaGlobalSetup = async function () {
   // Şema ve örnek veriler test veritabanına yüklenir (cds deploy ile aynı)
   const cds = require('@sap/cds')
   const db = await cds.connect.to('db')
-  await cds.deploy('*').to(db)
+  await cds.deploy('*', { mocked: true }).to(db)
   await db.disconnect?.()
 }

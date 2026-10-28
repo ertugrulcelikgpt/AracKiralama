@@ -1,4 +1,5 @@
 using {rentacar as db} from '../db/schema';
+using {API_BUSINESS_PARTNER as bp} from './external/API_BUSINESS_PARTNER';
 
 // Şube çalışanlarının ve yöneticilerin kullandığı servis: kiralama kayıtları + value help için ana veriler.
 service RentalService @(path: '/rental') {
@@ -43,4 +44,21 @@ service RentalService @(path: '/rental') {
 
   @readonly
   entity RentalStatus      as projection on db.RentalStatus;
+
+  // S/4HANA Business Partner'ların sadeleştirilmiş görünümü. Veri bizde tutulmaz: okumalar srv/rental-service.js'te
+  // uzak servise (veya mock'a) yönlendirilir. Sadece kişiler (category = '1') listelenir; bu filtre handler'da
+  // uygulanır, çünkü projeksiyondaki `where` uzak servise iletilmez.
+  @readonly
+  entity S4BusinessPartners as projection on bp.A_BusinessPartner {
+    key BusinessPartner         as ID,
+        FirstName               as firstName,
+        LastName                as lastName,
+        BusinessPartnerFullName as fullName,
+        BirthDate               as birthDate,
+        @UI.Hidden
+        BusinessPartnerCategory as category
+  };
+
+  // Business Partner'ı S/4'ten okuyup müşteri olarak kaydeder (varsa günceller)
+  action importFromS4(businessPartnerID : String(10) @mandatory) returns Customers;
 }

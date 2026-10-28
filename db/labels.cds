@@ -64,6 +64,8 @@ annotate rentacar.Customers with @title: '{i18n>Customer}' {
   licenseNumber    @title: '{i18n>LicenseNumber}';
   licenseIssueDate @title: '{i18n>LicenseIssueDate}';
   city             @title: '{i18n>City}';
+  businessPartnerID @title: '{i18n>BusinessPartnerID}';
+  source           @title: '{i18n>CustomerSource}';
 }
 
 annotate rentacar.Branches with @title: '{i18n>Branch}' {

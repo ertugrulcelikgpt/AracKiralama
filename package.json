@@ -6,7 +6,10 @@
   "private": true,
   "dependencies": {
     "@cap-js/postgres": "^3.1.2",
-    "@sap/cds": "^10"
+    "@sap/cds": "^10",
+    "@sap-cloud-sdk/connectivity": "^4",
+    "@sap-cloud-sdk/http-client": "^4",
+    "@sap-cloud-sdk/resilience": "^4"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^1.0.2",
@@ -20,10 +23,11 @@
   "scripts": {
     "start": "cds-serve",
     "watch": "cds watch",
+    "sandbox": "cds serve all --profile sandbox",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
-    "db:deploy": "cds deploy",
-    "db:reset": "docker compose down -v && docker compose up -d --wait && cds deploy",
+    "db:deploy": "cds deploy --with-mocks",
+    "db:reset": "docker compose down -v && docker compose up -d --wait && cds deploy --with-mocks",
     "lint": "eslint .",
     "test": "mocha",
     "test:pg": "mocha --config .mocharc.pg.json"
@@ -88,6 +92,16 @@
                 "FleetAdmin"
               ]
             }
+          }
+        }
+      },
+      "API_BUSINESS_PARTNER": {
+        "kind": "odata-v2",
+        "model": "srv/external/API_BUSINESS_PARTNER",
+        "[sandbox]": {
+          "credentials": {
+            "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_BUSINESS_PARTNER",
+            "requestTimeout": 10000
           }
         }
       }

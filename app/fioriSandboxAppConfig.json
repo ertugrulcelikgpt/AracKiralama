@@ -9,6 +9,11 @@
       "semanticObject": "Vehicles",
       "action": "manage",
       "rootPath": "./vehicles/webapp/"
+    },
+    {
+      "semanticObject": "Customers",
+      "action": "manage",
+      "rootPath": "./customers/webapp/"
     }
   ]
 }

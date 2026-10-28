@@ -1,0 +1,13 @@
+BusinessPartner;BusinessPartnerCategory;FirstName;LastName;BusinessPartnerFullName;BirthDate;OrganizationBPName1
+1000101;1;Mert;Çakır;Mert Çakır;1986-04-12;
+1000102;1;Seda;Korkmaz;Seda Korkmaz;1993-09-03;
+1000103;1;Kaan;Şimşek;Kaan Şimşek;1979-01-27;
+1000104;1;Melis;Güneş;Melis Güneş;2001-06-30;
+1000105;1;Tolga;Aksoy;Tolga Aksoy;1990-11-08;
+1000106;1;İpek;Yurt;İpek Yurt;1984-02-19;
+1000107;1;Barış;Uçar;Barış Uçar;1997-07-14;
+1000108;1;Derya;Özkan;Derya Özkan;1975-12-01;
+1000109;1;Onur;Eren;Onur Eren;1988-03-22;
+1000110;1;Gül;Tekin;Gül Tekin;1995-10-17;
+1000201;2;;;Örnek Lojistik A.Ş.;;Örnek Lojistik A.Ş.
+1000202;2;;;Deneme Turizm Ltd.;;Deneme Turizm Ltd.

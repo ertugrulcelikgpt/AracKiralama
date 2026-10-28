@@ -36,7 +36,8 @@ let shared
 export const setup = () => (shared ??= create())
 
 function create() {
-  const test = cds.test(PROJECT)
+  // --with-mocks: credentials'ı olmayan uzak servisler (API_BUSINESS_PARTNER) srv/external/data ile taklit edilir
+  const test = cds.test('serve', 'all', '--with-mocks', '--in-memory?').in(PROJECT)
   const { GET, POST, PATCH, DELETE } = test
   const as = (user, headers = {}) => ({ auth: { username: user, password: user }, headers })
   const draftKey = ID => `/rental/Rentals(ID=${ID},IsActiveEntity=false)`

@@ -29,10 +29,11 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 | Komut | Ne yapar |
 |---|---|
 | `npm run db:up` | PostgreSQL container'ını başlatır (sağlıklı olana kadar bekler) |
-| `npm run db:deploy` | Şemayı ve CSV verilerini PostgreSQL'e yükler (`cds deploy`) |
+| `npm run db:deploy` | Şemayı ve CSV verilerini PostgreSQL'e yükler (`cds deploy --with-mocks`, S/4 mock tabloları dahil) |
 | `npm run db:reset` | Volume'u silip veritabanını sıfırdan kurar ve yükler |
 | `npm run db:down` | Container'ı durdurur |
-| `npm run watch` | Geliştirme sunucusu (`cds watch`, http://localhost:4004) |
+| `npm run watch` | Geliştirme sunucusu (`cds watch`, http://localhost:4004), S/4 mock modunda |
+| `npm run sandbox` | S/4 olarak SAP sandbox'ı (`cds serve all --profile sandbox`); `.env`'de `BP_API_KEY` gerekir |
 | `npm test` | Tüm testler, bellek içi SQLite (Mocha, `test/setup.cjs`) |
 | `npm run test:pg` | Aynı testler PostgreSQL `rentacar_test` veritabanında (`test/setup-pg.cjs` oluşturur) |
 | `npm run lint` | ESLint |
@@ -56,6 +57,22 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 - `sap-messages` bilgi mesajları `cds.i18n.messages.at(key, req.locale, args)` ile çevrilir.
 - `srv/admin-service.js`: kiralamalarda kullanılan araç/şube/ek hizmet silinemez (409 `*_IN_USE`).
 
+## S/4HANA entegrasyonu (Aşama 8)
+
+- Uzak servis `API_BUSINESS_PARTNER` (OData V2): model `srv/external/`, mock verisi `srv/external/data/*.csv`.
+  Ayrıntı: `docs/s4-entegrasyonu.md`.
+- Mod credentials'a göre seçilir: yoksa mock (`--with-mocks`; `cds watch`, `db:deploy` ve `test/helpers.js` bunu
+  verir), `[sandbox]` profilinde URL + `APIKey` başlığı, production'da Destination (Aşama 10).
+- `BP_API_KEY` sadece `process.env`'den okunur (CAP `.env`'i development profilinde yükler). Koda, loga,
+  `.env.example`'a yazma. Doğrulamak gerekirse değeri değil uzunluğunu yazdır.
+- Sandbox için `cds watch` değil `cds serve` kullan: `cds watch` yerel bağlantı kaydından (`~/.cds-services.json`)
+  başka bir sunucunun mock'una bağlanabiliyor.
+- Hatalar `classifyS4Error` ile `S4_UNAUTHORIZED` / `S4_UNREACHABLE` / `S4_ERROR`'a çevrilir.
+- Projeksiyon `where`'i ve `$search` uzak servise gitmez; ikisi de `on('READ')` handler'ında çevrilir.
+- Bulut oturumunda sandbox.api.sap.com engelli olabilir. Sandbox davranışı sahte bir OData V2 sunucusu ve
+  `CDS_CONFIG='{"requires":{"API_BUSINESS_PARTNER":{"credentials":{"url":"http://localhost:<port>/..."}}}}'` ile
+  denenebilir (büyük harfli servis adı `CDS_REQUIRES_...` ortam değişkeniyle ezilemez).
+
 ## Yetki
 
 - Roller `srv/auth.cds`'te (`@requires`, `@restrict`); JS'te rol kontrolü yazma.
@@ -64,7 +81,8 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 
 ## Arayüz
 
-- Fiori Elements uygulamaları `app/rentals`, `app/vehicles`; UI5 `https://ui5.sap.com/1.153.0/` CDN'inden.
+- Fiori Elements uygulamaları `app/rentals`, `app/vehicles`, `app/customers` (salt okunur liste + S/4'ten Getir);
+  UI5 `https://ui5.sap.com/1.153.0/` CDN'inden.
 - Anotasyonlar: `app/common.cds` (ortak), `app/<uygulama>/annotations.cds`, dinamik davranış `srv/field-control.cds`.
 - Model değişince `npm run db:deploy`; `db:reset` sonrası `cds watch` yeniden başlatılmalı.
 - Bulut oturumunda ui5.sap.com ağ politikasıyla engelli olabilir. Ekran testi için UI5 Tooling (`ui5 serve`, SAPUI5
@@ -73,6 +91,7 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 ## Testler
 
 - Mocha tek süreçte çalışır: CAP sunucusu `test/helpers.js`'te bir kez başlatılıp paylaşılır (her dosyada `setup()`).
+  Sunucu `--with-mocks` ile başlar; S/4 testleri internet ve anahtar gerektirmez.
 - `test/setup.cjs` `NODE_ENV=test` ve `CDS_REQUIRES_DB_CREDENTIALS_DATABASE=:memory:` ayarlar; yoksa testler
   development profiliyle PostgreSQL geliştirme veritabanında çalışır.
 - Test tarihleri `day(n)` ile bugüne göre üretilir; K4 müşterileri test içinde oluşturulur. Örnek veri tarihlerine bağlama.

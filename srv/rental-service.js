@@ -52,10 +52,33 @@ export function calculatePrice({ pickupDate, returnDate, dailyRate, pickupBranch
   return { rentalDays, basePrice, extrasPrice, oneWayFee, discountAmount, totalPrice, extraAmounts }
 }
 
+// ---------------------------------------------------------------------------------------------------------------
+// S/4HANA bağlantı hatalarını kullanıcıya gösterilecek mesaja çevirir (saf fonksiyon). CAP uzak servis hatalarını
+// 502 ile sarar; gerçek HTTP durumu err.reason.response.status'tadır. Zaman aşımında yanıt yoktur.
+// ---------------------------------------------------------------------------------------------------------------
+export function classifyS4Error(err) {
+  const status = err?.reason?.response?.status ?? err?.response?.status
+  if (status === 401 || status === 403) return { status: 502, message: 'S4_UNAUTHORIZED' }
+  const text = `${err?.message} ${err?.reason?.message} ${err?.reason?.cause?.message ?? ''}`
+  // Ağ hatalarında CAP kodu her zaman alana koymaz; bazen sadece mesaj metninde ("fetch failed ... ENOTFOUND") geçer
+  const network = err?.reason?.cause?.code ?? err?.cause?.code ?? err?.code ?? ''
+  if (/timeout|timed out|fetch failed|ECONNREFUSED|ENOTFOUND|ECONNRESET|EAI_AGAIN/i.test(`${text} ${network}`) || status === 504)
+    return { status: 504, message: 'S4_UNREACHABLE' }
+  return { status: 502, message: 'S4_ERROR', args: [status ?? '-'] }
+}
+
 export default class RentalService extends cds.ApplicationService {
-  init() {
-    const { Rentals, RentalExtras } = this.entities
+  async init() {
+    const { Rentals, RentalExtras, S4BusinessPartners } = this.entities
     const db = cds.entities('rentacar')
+
+    // Sandbox modunda API anahtarı .env'deki BP_API_KEY'den gelir ve her isteğe APIKey başlığı olarak eklenir.
+    // Anahtar koda/commit'e girmez; CAP günlükte "key" içeren alanları maskeler.
+    const bpConfig = cds.env.requires.API_BUSINESS_PARTNER
+    if (process.env.BP_API_KEY && bpConfig?.credentials?.url)
+      bpConfig.credentials.headers = { ...bpConfig.credentials.headers, APIKey: process.env.BP_API_KEY }
+    const bupa = await cds.connect.to('API_BUSINESS_PARTNER')
+    const bp = bupa.entities
 
     // -------------------------------------------------------------------------------------------------------------
     // K1 – Tarih kontrolü
@@ -320,6 +343,68 @@ export default class RentalService extends cds.ApplicationService {
       })
       await recalculate(ACTIVES, { ...rental, discountPercent: applied })
       return readResult(rental.ID)
+    })
+
+    // =============================================================================================================
+    // S/4HANA Business Partner entegrasyonu (side-by-side): mock, sandbox veya destination ile aynı kod çalışır
+    // =============================================================================================================
+    const callS4 = async (req, run) => {
+      try { return await run() } catch (err) {
+        const { status, message, args } = classifyS4Error(err)
+        return req.reject(status, message, args)
+      }
+    }
+
+    // OData V2 servisleri $search desteklemez; aramayı ad/soyad üzerinde contains filtresine çeviriyoruz
+    function searchToFilter(query) {
+      const search = query.SELECT.search
+      if (!search) return query
+      const term = search.map(t => t.val).filter(Boolean).join(' ')
+      // delete yetmez: SELECT prototip zinciriyle türetilmiş olabilir; undefined olan seçenek V2 URL'ine yazılmaz
+      query.SELECT.search = undefined
+      return term ? query.where`contains(firstName, ${term}) or contains(lastName, ${term}) or contains(fullName, ${term})` : query
+    }
+
+    const PERSON = '1'
+    this.on('READ', S4BusinessPartners, async req => {
+      const result = await callS4(req, () => bupa.run(searchToFilter(req.query).where({ category: PERSON })))
+      // V2 sayımı metin olarak döner ("__count": "2"); V4'te @odata.count sayı olmalı
+      if (result?.$count !== undefined) result.$count = Number(result.$count)
+      return result
+    })
+
+    async function readBusinessPartner(ID) {
+      const partner = await bupa.run(SELECT.one.from(bp.A_BusinessPartner, ID)
+        .columns('BusinessPartner', 'BusinessPartnerCategory', 'FirstName', 'LastName', 'BirthDate'))
+      if (!partner) return
+      // Gezinme ilişkileri EDMX'te koşulsuz tanımlı olduğu için adres, e-posta ve telefon anahtarla ayrıca okunur
+      const address = await bupa.run(SELECT.one.from(bp.A_BusinessPartnerAddress)
+        .columns('AddressID', 'CityName').where({ BusinessPartner: ID }))
+      const email = address && await bupa.run(SELECT.one.from(bp.A_AddressEmailAddress)
+        .columns('EmailAddress').where({ AddressID: address.AddressID }))
+      const phone = address && await bupa.run(SELECT.one.from(bp.A_AddressPhoneNumber)
+        .columns('PhoneNumber', 'InternationalPhoneNumber').where({ AddressID: address.AddressID }))
+      return { ...partner, city: address?.CityName, email: email?.EmailAddress,
+        phone: phone?.InternationalPhoneNumber || phone?.PhoneNumber }
+    }
+
+    this.on('importFromS4', async req => {
+      const ID = req.data.businessPartnerID?.trim()
+      const partner = await callS4(req, () => readBusinessPartner(ID))
+      if (!partner) return req.reject(404, 'S4_BP_NOT_FOUND', [ID])
+      if (partner.BusinessPartnerCategory !== '1') return req.reject(400, 'S4_BP_NOT_PERSON', [ID])
+
+      const data = {
+        firstName: partner.FirstName, lastName: partner.LastName, birthDate: partner.BirthDate ?? null,
+        email: partner.email ?? null, phone: partner.phone ?? null, city: partner.city ?? null,
+        businessPartnerID: ID, source: 'S4'
+      }
+      // Aynı Business Partner ikinci kez aktarılırsa yeni müşteri açılmaz, mevcut kayıt güncellenir
+      const existing = await SELECT.one.from(db.Customers).columns('ID').where({ businessPartnerID: ID })
+      const customerID = existing?.ID ?? cds.utils.uuid()
+      if (existing) await UPDATE(db.Customers, customerID).with(data)
+      else await INSERT.into(db.Customers).entries({ ID: customerID, ...data })
+      return this.read(this.entities.Customers, customerID)
     })
 
     return super.init()

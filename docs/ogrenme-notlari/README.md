@@ -13,5 +13,6 @@ cap-sflight'taki karşılığı, ABAP RAP'teki karşılığı (derlenmemiş örn
 | [05 — Yetkilendirme](05-yetkilendirme.md) | 4 | 401/403, `@requires`/`@restrict`, mocked auth, `xs-security.json` |
 | [06 — Fiori arayüzü](06-fiori-arayuz.md) | 5 | Floorplan'lar, anotasyon → ekran tablosu, value help, launchpad sandbox |
 | [07 — Testler](07-testler.md) | 6 | `cds.test`, Mocha, test izolasyonu, SQLite ve PostgreSQL farkları |
+| [08 — S/4HANA entegrasyonu](08-s4-entegrasyonu.md) | 8 | `cds import`, uzak servis, mock/sandbox/destination, V2 → V4, hata yönetimi, gizli anahtar |
 
 Takıldığında: "çözümü verme, ipucu ver" diye sorabilirsin.
