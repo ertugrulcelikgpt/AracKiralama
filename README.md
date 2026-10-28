@@ -151,6 +151,7 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | İstekte "column ... does not exist" | Model değişti, veritabanı eski | `npm run db:deploy` (gerekirse `npm run db:reset`) |
 | `cds watch` `db:reset` sonrası "server shutdown" ile kapandı | Container yeniden kurulurken açık bağlantılar koptu | `npm run watch`'ı yeniden başlat |
 | Arayüz boş kalıyor veya yüklenmiyor | UI5, `ui5.sap.com`'dan yüklenir; internet veya kurumsal proxy engeli | `https://ui5.sap.com/1.153.0/resources/sap-ui-version.json` tarayıcıda açılıyor mu bak |
+| Kutucuğa tıklayınca "Uygulama, uygulamanın SAP UI5 bileşeni yüklenemediğinden açılamadı" | Giriş yapılmadı; tarayıcı kullanıcı adı/şifre penceresini açmadı (ayrıntıda "Unauthorized") | Yeni sekmede http://localhost:4004/rental/ aç, `agent`/`agent` ile gir, sonra launchpad'i yenile |
 | Hep aynı kullanıcıyla giriliyor | Tarayıcı Basic Auth bilgisini hatırlar | Başka kullanıcı için gizli pencere aç |
 | `npm run test:pg`: "ECONNREFUSED" | PostgreSQL ayakta değil | `npm run db:up` |
 | S/4'ten Getir: "S/4HANA erişimi reddedildi (401/403)" | `BP_API_KEY` yok, yanlış veya yenilenmiş | `.env`'deki anahtarı kontrol et, `npm run sandbox`'ı yeniden başlat |
