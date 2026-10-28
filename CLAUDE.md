@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+Bu dosya, projeyi devralan bir Claude oturumu için özet, komutlar ve kurallardır.
+
 ## Git kuralları
 
 - Tüm commit'ler şu kimlikle atılmalıdır:
@@ -9,3 +11,38 @@
 - Commit mesajlarına `Co-Authored-By: Claude ...` satırı, `Claude-Session:` linki veya başka herhangi bir Claude/Anthropic atıf satırı **ekleme**.
 - PR açıklamalarına "Generated with Claude Code" veya benzeri atıf satırı **ekleme**.
 - Amaç: GitHub Contributors listesinde yalnızca repo sahibi görünmeli.
+- Geliştirme dalı: `tryfirst`. Her aşama sonunda anlamlı bir commit (ör. `feat(db): add rental domain model`).
+
+## Proje özeti
+
+RentACar: SAP CAP (Node.js) ile çok şubeli bir araç kiralama uygulaması. Mimari SAP-samples/cap-sflight'tan
+esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat, ABAP RAP karşılığını ver.
+
+- Veritabanı: development → PostgreSQL (`@cap-js/postgres`, Docker), test → SQLite in-memory, production → SAP HANA Cloud (Aşama 10).
+- Bağlantı bilgileri `.env` içinde (`CDS_REQUIRES_DB_CREDENTIALS_*`), commit edilmez; şablon `.env.example`.
+- Kullanıcının ortamı Windows 11 + PowerShell; ona verilen komutlar PowerShell uyumlu olmalı.
+
+## Komutlar
+
+| Komut | Ne yapar |
+|---|---|
+| `npm run db:up` | PostgreSQL container'ını başlatır (sağlıklı olana kadar bekler) |
+| `npm run db:deploy` | Şemayı ve CSV verilerini PostgreSQL'e yükler (`cds deploy`) |
+| `npm run db:reset` | Volume'u silip veritabanını sıfırdan kurar ve yükler |
+| `npm run db:down` | Container'ı durdurur |
+| `npm run watch` | Geliştirme sunucusu (`cds watch`, http://localhost:4004) |
+| `npm run lint` | ESLint |
+
+## Kod kuralları
+
+- Tanımlayıcılar İngilizce, dokümantasyon ve yorumlar Türkçe; yorum sadece "neden" gerektiğinde.
+- Arayüz metinleri `_i18n/i18n*.properties`, hata mesajları `_i18n/messages*.properties` (anahtar ile `req.error`).
+- Servis kodu `cds.ApplicationService` sınıfı, sorgular CQL; model iki veritabanında da derlenebilmeli
+  (`cds compile db --to sql --dialect postgres` ve `cds compile db --to hana`).
+- Örnek verilerdeki kişi bilgileri tamamen uydurma.
+- API anahtarlarını (ör. `BP_API_KEY`) asla koda, loga veya commit'e koyma.
+
+## Dokümantasyon
+
+`docs/` altındaki dosyalar her aşamada güncellenir: `mimari.md`, `is-kurallari.md`, `cap-vs-rap.md`, `sozluk.md`,
+`ogrenme-notlari/NN-*.md`. Yol haritası ve aşama durumu: README.md → "Yol haritası".

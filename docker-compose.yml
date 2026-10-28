@@ -1,0 +1,23 @@
+# Lokal geliştirme veritabanı. Bağlantı bilgileri .env dosyasından okunur;
+# CAP ile aynı değişkenler kullanılır, böylece şifre tek bir yerde durur.
+services:
+  postgres:
+    image: postgres:16
+    container_name: rentacar-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CDS_REQUIRES_DB_CREDENTIALS_DATABASE:-rentacar}
+      POSTGRES_USER: ${CDS_REQUIRES_DB_CREDENTIALS_USER:-postgres}
+      POSTGRES_PASSWORD: ${CDS_REQUIRES_DB_CREDENTIALS_PASSWORD:-postgres}
+    ports:
+      - "${CDS_REQUIRES_DB_CREDENTIALS_PORT:-5432}:5432"
+    volumes:
+      - rentacar-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  rentacar-pgdata:

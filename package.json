@@ -5,6 +5,7 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "@cap-js/postgres": "^3.1.2",
     "@sap/cds": "^10"
   },
   "devDependencies": {
@@ -15,6 +16,25 @@
   "scripts": {
     "start": "cds-serve",
     "watch": "cds watch",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:deploy": "cds deploy",
+    "db:reset": "docker compose down -v && docker compose up -d --wait && cds deploy",
     "lint": "eslint ."
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "[development]": {
+          "kind": "postgres"
+        },
+        "[test]": {
+          "kind": "sqlite",
+          "credentials": {
+            "url": ":memory:"
+          }
+        }
+      }
+    }
   }
 }

@@ -18,3 +18,8 @@ mta_archives/
 
 # @cap-js/cds-typer
 @cds-models
+
+# Lokal ortam değişkenleri (şifre, API anahtarı)
+.env
+.env.*
+!.env.example
