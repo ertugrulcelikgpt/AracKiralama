@@ -46,6 +46,18 @@ Dil için adrese `?sap-language=tr` veya `?sap-language=en` ekle.
 
 Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run db:down`.
 
+## Testler
+
+```powershell
+npm test            # 86 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
+npm run test:pg     # aynı testler PostgreSQL'e karşı (ayrı rentacar_test veritabanı; önce npm run db:up)
+npm test -- --grep K2   # sadece adında "K2" geçen testler
+```
+
+Kapsam: K1–K8 iş kuralları (başarılı ve hatalı durumlar), 5 action'ın ön koşulları, yetki (401/403), fiyat
+senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı. Ayrıntı ve SQLite–PostgreSQL farkları:
+[`docs/ogrenme-notlari/07-testler.md`](docs/ogrenme-notlari/07-testler.md).
+
 ## Servisler
 
 | Servis | URL | İçerik |
@@ -72,7 +84,7 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 | `srv/` | `rental-service.cds` + `rental-service.js` (iş kuralları), `field-control.cds`, `admin-service.cds`, `auth.cds` (yetkiler) |
 | `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
-| `test/` | `requests.http` örnek istekleri (ileride otomatik testler) |
+| `test/` | Otomatik testler (`*.test.js`, Mocha + `@cap-js/cds-test`), `requests.http` örnek istekleri |
 | `xs-security.json` | BTP XSUAA yetki yapılandırması taslağı (Aşama 10'da kullanılacak) |
 | `docs/` | Mimari, iş kuralları, CAP–RAP karşılaştırması, sözlük, öğrenme notları |
 | `docker-compose.yml` | Lokal PostgreSQL |
@@ -100,6 +112,7 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | `@cap-js/sqlite` | 3.1.2 |
 | PostgreSQL | 16 |
 | SAPUI5 (CDN) | 1.153.0 |
+| `@cap-js/cds-test` + Mocha | 1.0.2 + 12.0.3 |
 
 ## Yol haritası
 
@@ -111,8 +124,8 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | 3 | İş mantığı (K1–K8, action'lar) | ✅ |
 | 4 | Yetkilendirme | ✅ |
 | 5 | Fiori Elements arayüzü | ✅ |
-| 6 | Testler | ⏳ |
-| 7 | Dokümantasyon ve gözden geçirme | |
+| 6 | Testler | ✅ |
+| 7 | Dokümantasyon ve gözden geçirme | ⏳ |
 | 8 | S/4HANA Business Partner entegrasyonu | |
 | 9 | (Opsiyonel) Analitik | |
 | 10 | BTP deploy hazırlığı (SAP HANA Cloud) | |

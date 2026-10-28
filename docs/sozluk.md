@@ -57,3 +57,9 @@
 | Fiori Launchpad (FLP) | Uygulamaların kutucuk (tile) olarak sunulduğu giriş sayfası. Lokalde "sandbox". |
 | Semantic object / action | Launchpad'de bir uygulamayı adresleyen çift: `Rentals-manage`. |
 | Metadata Extension | RAP'te UI anotasyonlarının yazıldığı ayrı CDS nesnesi. |
+| `cds.test` | CAP'in test aracı: sunucuyu test içinde başlatır, HTTP istekleri atmayı sağlar (`@cap-js/cds-test`). |
+| Birim / entegrasyon testi | Tek fonksiyonu izole test etmek / tüm katmanları (OData → handler → veritabanı) birlikte test etmek. |
+| Mocha / Jest | JavaScript test koşucuları (test runner). Bu projede ESM desteği için Mocha. |
+| ABAP Unit | ABAP'ın birim test çatısı; RAP'te test double'larla birlikte kullanılır. |
+| Test double | Testte gerçek bağımlılık (veritabanı, iş nesnesi) yerine kullanılan sahte nesne. |
+| Collation | Bir veritabanının metinleri karşılaştırma/sıralama kuralı (ör. "Ö" nereye sıralanır). |

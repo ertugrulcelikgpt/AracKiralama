@@ -1,0 +1,5 @@
+{
+  "spec": "test/**/*.test.js",
+  "require": ["test/setup.cjs"],
+  "timeout": 30000
+}

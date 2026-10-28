@@ -1,0 +1,5 @@
+{
+  "spec": "test/**/*.test.js",
+  "require": ["test/setup-pg.cjs"],
+  "timeout": 60000
+}

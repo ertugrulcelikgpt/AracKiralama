@@ -42,3 +42,4 @@
 | Kod yerine metin | `@Common.Text` + `TextArrangement` | `@ObjectModel.text.element` / `text.association` |
 | Uygulama iskeleti | `webapp/manifest.json` + `Component.js` + `index.html` (elle) | Service Binding önizleme veya Fiori Tools generator |
 | Launchpad | `app/index.html` sandbox + `fioriSandboxAppConfig.json` | FLP: Business Catalog + Space/Page + Launchpad App Descriptor Item |
+| Test | `cds.test` + Mocha: gerçek OData istekleriyle entegrasyon testi, bellek içi SQLite | ABAP Unit (`FOR TESTING`) + test double'lar (`cl_botd_txbufdbl_bo_test_env`, `cl_osql_test_environment`) |

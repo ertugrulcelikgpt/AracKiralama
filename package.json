@@ -9,9 +9,13 @@
     "@sap/cds": "^10"
   },
   "devDependencies": {
+    "@cap-js/cds-test": "^1.0.2",
     "@cap-js/sqlite": "^3",
     "@sap/cds-dk": "^10",
-    "eslint": "^10.13.0"
+    "chai": "^6.3.0",
+    "chai-as-promised": "^8.0.2",
+    "eslint": "^10.13.0",
+    "mocha": "^12.0.3"
   },
   "scripts": {
     "start": "cds-serve",
@@ -20,7 +24,9 @@
     "db:down": "docker compose down",
     "db:deploy": "cds deploy",
     "db:reset": "docker compose down -v && docker compose up -d --wait && cds deploy",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "mocha",
+    "test:pg": "mocha --config .mocharc.pg.json"
   },
   "cds": {
     "requires": {

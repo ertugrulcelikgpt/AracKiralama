@@ -36,6 +36,17 @@ Birden fazla kural aynı anda ihlal edilirse (ör. K1 + K3 + K4) hepsi tek yanı
 - Butonların aktif/pasif durumu `@Core.OperationAvailable` ile verilir; yönetici action'ları ayrıca `canManage`
   (kullanıcı RentalManager mı?) alanına bakar (`srv/field-control.cds:46–107`).
 
+## Testler
+
+Her kural ve action için başarılı ve hatalı durumlar otomatik test edilir (`npm test`, `npm run test:pg`):
+
+| Kural / konu | Test dosyası → `describe` bloğu |
+|---|---|
+| K1–K8, draft akışı, taslakta anlık fiyat, çoklu hata, TR/EN mesaj | `test/rental-rules.test.js` → "K1 – Tarih kontrolü" ... "K8 – Numara üretimi" |
+| K5 hesaplama formülü (birim) | `test/pricing.test.js` |
+| 5 action | `test/rental-actions.test.js` → "approve()", "reject(reason)", "complete(returnKm)", "cancel()", "applyDiscount(percent)" |
+| Action yetkileri (kim) | `test/auth.test.js` |
+
 ## K8 – Eşzamanlı numara üretimi
 
 `max + 1` yöntemi basittir ama iki kullanıcı aynı anda kaydederse ikisi de aynı `max` değerini okuyup aynı

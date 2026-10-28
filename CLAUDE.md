@@ -33,6 +33,8 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 | `npm run db:reset` | Volume'u silip veritabanını sıfırdan kurar ve yükler |
 | `npm run db:down` | Container'ı durdurur |
 | `npm run watch` | Geliştirme sunucusu (`cds watch`, http://localhost:4004) |
+| `npm test` | Tüm testler, bellek içi SQLite (Mocha, `test/setup.cjs`) |
+| `npm run test:pg` | Aynı testler PostgreSQL `rentacar_test` veritabanında (`test/setup-pg.cjs` oluşturur) |
 | `npm run lint` | ESLint |
 
 ## Kod kuralları
@@ -66,6 +68,14 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 - Model değişince `npm run db:deploy`; `db:reset` sonrası `cds watch` yeniden başlatılmalı.
 - Bulut oturumunda ui5.sap.com ağ politikasıyla engelli olabilir. Ekran testi için UI5 Tooling (`ui5 serve`, SAPUI5
   npm'den) + Playwright'ta `ui5.sap.com/1.153.0/**` isteklerini yerel sunucuya yönlendirmek işe yarar.
+
+## Testler
+
+- Mocha tek süreçte çalışır: CAP sunucusu `test/helpers.js`'te bir kez başlatılıp paylaşılır (her dosyada `setup()`).
+- `test/setup.cjs` `NODE_ENV=test` ve `CDS_REQUIRES_DB_CREDENTIALS_DATABASE=:memory:` ayarlar; yoksa testler
+  development profiliyle PostgreSQL geliştirme veritabanında çalışır.
+- Test tarihleri `day(n)` ile bugüne göre üretilir; K4 müşterileri test içinde oluşturulur. Örnek veri tarihlerine bağlama.
+- Yeni kural/action eklenince test ekle; `npm test` ve `npm run test:pg` ikisi de yeşil olmalı.
 
 ## Dokümantasyon
 
