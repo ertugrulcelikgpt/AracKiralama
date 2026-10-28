@@ -70,6 +70,15 @@ Aşağıdaki tablo bu projedeki her yapının RAP karşılığını verir. RAP k
 | Uygulama iskeleti | `webapp/manifest.json` + `Component.js` + `index.html` (elle) | Service Binding önizleme veya Fiori Tools generator |
 | Launchpad | `app/index.html` sandbox + `fioriSandboxAppConfig.json` | FLP: Business Catalog + Space/Page + Launchpad App Descriptor Item |
 
+### Analitik
+| Konu | Bu projede (CAP) | ABAP RAP karşılığı |
+|---|---|---|
+| Analitik model | `AnalyticsService.RentalAnalytics` (projeksiyon, boyut + ölçü) | Küp view (`@Analytics.dataCategory: #CUBE`) + analitik sorgu (`provider contract analytical_query`) |
+| Ölçünün toplanması | `@Aggregation.default: #SUM` | `@Aggregation.default: #SUM` (aynı anotasyon) |
+| Tutar / para birimi | `@Semantics.amount.currencyCode`, `@Semantics.currencyCode` | Aynı anotasyonlar |
+| Toplama protokolü | OData `$apply` (CAP kendisi çevirir) | OData `$apply` veya InA protokolü (SAP Analytics Cloud) |
+| Analiz ekranı | Analytical List Page (`UI.Chart` + analitik tablo) | ALP veya Multidimensional Report (Fiori) |
+
 ### Entegrasyon ve test
 | Konu | Bu projede (CAP) | ABAP RAP karşılığı |
 |---|---|---|

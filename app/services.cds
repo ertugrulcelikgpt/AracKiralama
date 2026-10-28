@@ -2,3 +2,4 @@
 using from './rentals/annotations';
 using from './vehicles/annotations';
 using from './customers/annotations';
+using from './analytics/annotations';

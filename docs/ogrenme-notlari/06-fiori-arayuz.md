@@ -32,7 +32,7 @@ Uygulamanın kendisi sadece üç dosyadır:
 
 | Anotasyon | Ekranda ürettiği | Projede |
 |---|---|---|
-| `@UI.HeaderInfo` | Nesne sayfası başlığı (Title + Description) ve tablo başlığı ("Kiralamalar (12)") | `rentalID` + `customer.fullName` |
+| `@UI.HeaderInfo` | Nesne sayfası başlığı (Title + Description) ve tablo başlığı ("Kiralamalar (41)") | `rentalID` + `customer.fullName` |
 | `@UI.SelectionFields` | Liste üstündeki filtre çubuğu alanları | Statü, şube, müşteri, teslim tarihi, araç kategorisi (`vehicle.category_code`: ilişki üzerinden filtre) |
 | `@Capabilities.FilterRestrictions` (`SingleRange`) | Tarih filtresinin tek gün yerine **aralık** seçtirmesi | `pickupDate` |
 | `@UI.PresentationVariant` | Tablonun varsayılan sıralaması | `rentalID` azalan |

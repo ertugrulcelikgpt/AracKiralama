@@ -73,6 +73,15 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
   `CDS_CONFIG='{"requires":{"API_BUSINESS_PARTNER":{"credentials":{"url":"http://localhost:<port>/..."}}}}'` ile
   denenebilir (büyük harfli servis adı `CDS_REQUIRES_...` ortam değişkeniyle ezilemez).
 
+## Analitik (Aşama 9)
+
+- `srv/analytics-service.cds`: `RentalAnalytics` sadece A/C kiralamalar; ölçüler `@Aggregation.default: #SUM` +
+  `@Aggregation.CustomAggregate`, ciro `@Semantics.amount.currencyCode`. Metin alanları (`branchName`...)
+  `GroupableProperties`'te kalmalı.
+- `srv/analytics-service.js`: sıralamasız gruplu sorguya gruplama alanlarına göre `orderBy` ekler (aylık trend).
+- `substring` 0'dan sayar. Örnek veride 1012–1040 tamamlanmış geçmiş kiralamalar (Nisan–Ekim) analitik içindir;
+  yeni kiralama numarası 1041'den başlar.
+
 ## Yetki
 
 - Roller `srv/auth.cds`'te (`@requires`, `@restrict`); JS'te rol kontrolü yazma.
@@ -81,7 +90,8 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 
 ## Arayüz
 
-- Fiori Elements uygulamaları `app/rentals`, `app/vehicles`, `app/customers` (salt okunur liste + S/4'ten Getir);
+- Fiori Elements uygulamaları `app/rentals`, `app/vehicles`, `app/customers` (salt okunur liste + S/4'ten Getir),
+  `app/analytics` (Analytical List Page, sadece manager);
   UI5 `https://ui5.sap.com/1.153.0/` CDN'inden.
 - Anotasyonlar: `app/common.cds` (ortak), `app/<uygulama>/annotations.cds`, dinamik davranış `srv/field-control.cds`.
 - Model değişince `npm run db:deploy`; `db:reset` sonrası `cds watch` yeniden başlatılmalı.

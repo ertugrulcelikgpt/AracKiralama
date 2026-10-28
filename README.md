@@ -15,6 +15,8 @@ Mimari, SAP'nin resmi örneği [SAP-samples/cap-sflight](https://github.com/SAP-
 | ![Araç seçimi](docs/img/07-arac-value-help.png) | ![Filo listesi](docs/img/08-filo-listesi.png) |
 | **S/4HANA'dan Getir: iş ortağı seçimi** | **İçe aktarılan müşteri (Kaynak = S4)** |
 | ![İş ortağı value help](docs/img/11-bp-value-help.png) | ![Müşteriler](docs/img/12-musteri-listesi-s4.png) |
+| **Kiralama analizi: şube bazında ciro** | **Aylık trend** |
+| ![Ciro analizi](docs/img/14-analiz-ciro.png) | ![Aylık trend](docs/img/15-analiz-aylik-trend.png) |
 
 Diğer ekranlar: [agent görünümü](docs/img/03-kiralama-detay-agent.png) · [km hatası](docs/img/06-tamamla-km-hatasi.png) ·
 [launchpad](docs/img/09-launchpad.png) · [İngilizce liste](docs/img/10-kiralama-listesi-en.png) ·
@@ -44,6 +46,7 @@ Dil için adrese `?sap-language=tr` veya `?sap-language=en` ekle.
 | Kiralama Yönetimi | http://localhost:4004/rentals/webapp/index.html?sap-language=tr |
 | Filo Yönetimi | http://localhost:4004/vehicles/webapp/index.html?sap-language=tr |
 | Müşteriler (S/4HANA'dan Getir) | http://localhost:4004/customers/webapp/index.html?sap-language=tr |
+| Kiralama Analizi (sadece manager) | http://localhost:4004/analytics/webapp/index.html?sap-language=tr |
 
 > Model (`.cds`) değiştiğinde `npm run db:deploy` çalıştır; `cds watch` PostgreSQL şemasını kendisi güncellemez.
 > `npm run db:reset` sonrası `cds watch`'ı yeniden başlat (veritabanı bağlantıları kopar).
@@ -66,14 +69,14 @@ commit'leme veya GitHub web arayüzüyle yükleme. Ayrıntı: [`docs/s4-entegras
 ## Testler
 
 ```powershell
-npm test            # 109 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
+npm test            # 116 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
 npm run test:pg     # aynı testler PostgreSQL'e karşı (ayrı rentacar_test veritabanı; önce npm run db:up)
 npm test -- --grep K2   # sadece adında "K2" geçen testler
 ```
 
 Kapsam: K1–K8 iş kuralları (başarılı ve hatalı durumlar), 5 action'ın ön koşulları, yetki (401/403), fiyat
 senaryoları (1/7/14 gün, farklı şube, ek hizmet), draft akışı, ana veri silme koruması, S/4HANA okuma ve içe
-aktarma (mock modunda; internet ve API anahtarı gerekmez). Ayrıntı ve SQLite–PostgreSQL farkları:
+aktarma (mock modunda; internet ve API anahtarı gerekmez), analitik toplamlar (`$apply`). Ayrıntı ve SQLite–PostgreSQL farkları:
 [`docs/ogrenme-notlari/07-testler.md`](docs/ogrenme-notlari/07-testler.md).
 
 ## Servisler
@@ -81,6 +84,7 @@ aktarma (mock modunda; internet ve API anahtarı gerekmez). Ayrıntı ve SQLite�
 | Servis | URL | İçerik |
 |---|---|---|
 | `RentalService` | http://localhost:4004/rental | Kiralamalar (draft), müşteriler, value help verileri, S/4 iş ortakları (`S4BusinessPartners`), `importFromS4` |
+| `AnalyticsService` | http://localhost:4004/analytics | Kiralama analizi (`$apply`): şube bazında ciro, kategori bazında kiralama sayısı, aylık trend |
 | `AdminService` | http://localhost:4004/admin | Araçlar (draft), şubeler, ek hizmetler, kategoriler |
 
 Örnek istekler: [`test/requests.http`](test/requests.http) (VS Code REST Client eklentisi).
@@ -100,9 +104,9 @@ aktarma (mock modunda; internet ve API anahtarı gerekmez). Ayrıntı ve SQLite�
 | Klasör / Dosya | Amaç |
 |---|---|
 | `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
-| `srv/` | `rental-service.cds/.js` (kiralama, iş kuralları, S/4 entegrasyonu), `admin-service.cds/.js` (filo, silme koruması), `field-control.cds`, `auth.cds` (yetkiler) |
+| `srv/` | `rental-service.cds/.js` (kiralama, iş kuralları, S/4 entegrasyonu), `analytics-service.cds/.js` (analitik), `admin-service.cds/.js` (filo, silme koruması), `field-control.cds`, `auth.cds` (yetkiler) |
 | `srv/external/` | S/4HANA Business Partner API modeli (`cds import`) ve mock verileri (`data/*.csv`) |
-| `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`, `customers`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
+| `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`, `customers`, `analytics`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
 | `test/` | Otomatik testler (`*.test.js`, Mocha + `@cap-js/cds-test`), `requests.http` örnek istekleri |
 | `xs-security.json` | BTP XSUAA yetki yapılandırması taslağı (Aşama 10'da kullanılacak) |
@@ -117,7 +121,7 @@ Lokalde CAP'in `mocked` kimlik doğrulaması kullanılır (tarayıcı kullanıc�
 | Kullanıcı / şifre | Roller | Yapabilecekleri |
 |---|---|---|
 | `agent` / `agent` | RentalAgent | Kiralama oluşturma/düzenleme, müşteri ekleme, S/4'ten müşteri getirme, tamamlama, iptal |
-| `manager` / `manager` | RentalAgent, RentalManager | Agent'ın her şeyi + onaylama, reddetme, indirim |
+| `manager` / `manager` | RentalAgent, RentalManager | Agent'ın her şeyi + onaylama, reddetme, indirim, kiralama analizi |
 | `admin` / `admin` | FleetAdmin | Sadece filo yönetimi (AdminService) |
 
 Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BTP için taslak: `xs-security.json`.
@@ -163,7 +167,7 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | 6 | Testler | ✅ |
 | 7 | Dokümantasyon ve gözden geçirme | ✅ |
 | 8 | S/4HANA Business Partner entegrasyonu | ✅ |
-| 9 | (Opsiyonel) Analitik | |
+| 9 | (Opsiyonel) Analitik | ✅ |
 | 10 | BTP deploy hazırlığı (SAP HANA Cloud) | |
 
 ## Dokümanlar

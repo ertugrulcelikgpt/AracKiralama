@@ -14,5 +14,6 @@ cap-sflight'taki karşılığı, ABAP RAP'teki karşılığı (derlenmemiş örn
 | [06 — Fiori arayüzü](06-fiori-arayuz.md) | 5 | Floorplan'lar, anotasyon → ekran tablosu, value help, launchpad sandbox |
 | [07 — Testler](07-testler.md) | 6 | `cds.test`, Mocha, test izolasyonu, SQLite ve PostgreSQL farkları |
 | [08 — S/4HANA entegrasyonu](08-s4-entegrasyonu.md) | 8 | `cds import`, uzak servis, mock/sandbox/destination, V2 → V4, hata yönetimi, gizli anahtar |
+| [09 — Analitik](09-analitik.md) | 9 | Boyut ve ölçü, OData `$apply`, `@Aggregation`, `@Semantics` para birimi, Analytical List Page |
 
 Takıldığında: "çözümü verme, ipucu ver" diye sorabilirsin.

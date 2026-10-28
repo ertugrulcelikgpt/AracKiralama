@@ -258,7 +258,7 @@ describe('İş kuralları (RentalService)', () => {
     it('yeni kiralamalar max + 1 numarası alır', async () => {
       const a = await t.createRental(t.valid({ pickupDate: day(30), returnDate: day(32) }))
       const b = await t.createRental(t.valid({ pickupDate: day(40), returnDate: day(42) }))
-      expect([a.rentalID, b.rentalID]).to.deep.equal([1012, 1013])
+      expect([a.rentalID, b.rentalID]).to.deep.equal([1041, 1042]) // örnek verideki en büyük numara 1040
     })
 
     it('düzenleme numarayı değiştirmez', async () => {

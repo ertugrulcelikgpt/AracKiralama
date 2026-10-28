@@ -17,11 +17,13 @@ flowchart TB
     UIR["Kiralama Yönetimi<br/>app/rentals"]
     UIV["Filo Yönetimi<br/>app/vehicles"]
     UIC["Müşteriler<br/>app/customers"]
+    UIA["Kiralama Analizi<br/>app/analytics"]
   end
   subgraph CAP["CAP sunucusu (Node.js)"]
     AUTH["Kimlik / yetki<br/>mocked → XSUAA · srv/auth.cds"]
     RS["RentalService /rental<br/>srv/rental-service.js · K1–K8, action'lar"]
     AS["AdminService /admin<br/>srv/admin-service.js · silme koruması"]
+    AN["AnalyticsService /analytics<br/>$apply · ciro, sayı, trend"]
     MODEL["CDS modeli<br/>db/*.cds"]
   end
   subgraph S4["S/4HANA (profil)"]
@@ -32,12 +34,13 @@ flowchart TB
     SQ[("SQLite<br/>test")]
     HA[("SAP HANA Cloud<br/>production")]
   end
-  FLP --> UIR & UIV & UIC
+  FLP --> UIR & UIV & UIC & UIA
   UIR -- "OData V4" --> AUTH
   UIV -- "OData V4" --> AUTH
   UIC -- "OData V4" --> AUTH
-  AUTH --> RS & AS
-  RS & AS --> MODEL
+  UIA -- "OData V4 $apply" --> AUTH
+  AUTH --> RS & AS & AN
+  RS & AS & AN --> MODEL
   MODEL --> PG & SQ & HA
   RS -- "OData V2 (uzak servis)" --> BP
 ```
@@ -46,7 +49,7 @@ flowchart TB
 
 | Katman | Klasör | İçerik |
 |---|---|---|
-| Arayüz (UI) | `app/` | Fiori Elements (OData V4): `app/rentals` (Kiralama Yönetimi), `app/vehicles` (Filo Yönetimi), `app/customers` (Müşteriler, S/4'ten içe aktarma), `app/index.html` (launchpad sandbox) |
+| Arayüz (UI) | `app/` | Fiori Elements (OData V4): `app/rentals` (Kiralama Yönetimi), `app/vehicles` (Filo Yönetimi), `app/customers` (Müşteriler, S/4'ten içe aktarma), `app/analytics` (Kiralama Analizi, ALP), `app/index.html` (launchpad sandbox) |
 | Servis | `srv/` | CDS servis tanımları, yetkiler (`auth.cds`), JavaScript handler'ları (iş kuralları) |
 | Uzak servis | `srv/external/` | S/4HANA Business Partner API'sinin içe aktarılmış modeli (`cds import`) ve mock verileri |
 | Veri modeli | `db/` | CDS entity'leri, kod listeleri, örnek CSV verileri |
@@ -150,6 +153,7 @@ Kod listeleri (`VehicleCategories`, `FuelTypes`, `TransmissionTypes`, `VehicleSt
 | Servis | Yol | Entity'ler | Not |
 |---|---|---|---|
 | `RentalService` | `/rental` | `Rentals` (draft), `RentalExtras`, `Customers`; salt okunur: `Vehicles`, `Branches`, `Extras`, kod listeleri, `S4BusinessPartners` (uzak); action `importFromS4` | Şube çalışanı ve yönetici |
+| `AnalyticsService` | `/analytics` | `RentalAnalytics` (salt okunur, `$apply` ile toplanır: şube/kategori/ay boyutları; ciro, kiralama sayısı, gün ölçüleri); value help için `Branches`, `VehicleCategories`, `RentalStatus` | Sadece yönetici; sadece onaylanmış ve tamamlanmış kiralamalar |
 | `AdminService` | `/admin` | `Vehicles` (draft), `Branches`, `Extras`, `VehicleCategories`; salt okunur: diğer kod listeleri | Filo yöneticisi |
 
 ## İstek akışı
@@ -182,6 +186,7 @@ sequenceDiagram
 | Dosya | İçerik |
 |---|---|
 | `srv/rental-service.js` | K1–K8 kuralları ve 5 action (her kural ayrı fonksiyon); `calculatePrice` saf fonksiyon olarak dışa aktarılır; S/4 okuma (`S4BusinessPartners`), `importFromS4` ve bağlantı hatası sınıflandırma (`classifyS4Error`) |
+| `srv/analytics-service.js` | Sıralama istenmemiş gruplu analitik sorguları gruplama alanlarına göre sıralar (aylık trend sırası) |
 | `srv/admin-service.js` | Kiralamalarda kullanılan araç, şube veya ek hizmetin silinmesini engeller (409 `*_IN_USE`) |
 | `srv/field-control.cds` | `@UI.UpdateHidden` (K7), `@UI.DeleteHidden`, `@Common.SideEffects` (K5, action'lar), `@Core.OperationAvailable` (action butonları + `canManage`) |
 | `_i18n/messages*.properties` | Hata ve bilgi mesajları (EN/TR) |
@@ -199,6 +204,7 @@ sequenceDiagram
 | `approve`, `reject`, `applyDiscount` | ❌ 403 | ✅ | ❌ |
 | Müşteri ekleme / düzenleme | ✅ | ✅ | ❌ |
 | S/4 iş ortaklarını okuma, `importFromS4` | ✅ | ✅ | ❌ 403 |
+| AnalyticsService (ciro analizi) | ❌ 403 | ✅ | ❌ 403 |
 | AdminService (araç, şube, ek hizmet) | ❌ 403 | ❌ 403 | ✅ |
 | Giriş yapılmamış | 401 | 401 | 401 |
 
@@ -211,8 +217,10 @@ flowchart LR
   FLP -->|Customers-manage| C["app/customers<br/>List Report + Object Page"]
   R -->|OData V4 /rental| RS[RentalService]
   C -->|OData V4 /rental| RS
+  FLP -->|RentalAnalytics-analyze| AN["app/analytics<br/>Analytical List Page"]
+  AN -->|OData V4 $apply /analytics| ANS[AnalyticsService]
   V -->|OData V4 /admin| AS[AdminService]
-  UI5[(ui5.sap.com<br/>SAPUI5 1.153.0)] -.-> FLP & R & V & C
+  UI5[(ui5.sap.com<br/>SAPUI5 1.153.0)] -.-> FLP & R & V & C & AN
 ```
 
 | Uygulama | Kullanıcı | Servis | Anotasyonlar |
@@ -220,6 +228,7 @@ flowchart LR
 | Kiralama Yönetimi | agent, manager | `/rental` | `app/rentals/annotations.cds`, `app/common.cds`, `srv/field-control.cds` |
 | Filo Yönetimi | admin | `/admin` | `app/vehicles/annotations.cds`, `app/common.cds` |
 | Müşteriler | agent, manager | `/rental` | `app/customers/annotations.cds` (S/4'ten Getir butonu, iş ortağı value help) |
+| Kiralama Analizi | manager | `/analytics` | `app/analytics/annotations.cds` (`UI.Chart`, analitik tablo); toplama anotasyonları `srv/analytics-service.cds` |
 
 ## Testler
 
@@ -237,5 +246,6 @@ flowchart LR
 | `test/rental-actions.test.js` | 5 action |
 | `test/auth.test.js` | 401/403, rol bazlı izinler |
 | `test/admin.test.js` | Ana veri silme koruması |
+| `test/analytics.test.js` | `$apply` toplamları (şube, kategori, ay), sadece A/C, yetki |
 | `test/s4-integration.test.js` | S/4 okuma, sayfalama, arama, içe aktarma, hata sınıflandırma (mock modu, internet gerekmez) |
 

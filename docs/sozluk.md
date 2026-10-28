@@ -8,15 +8,19 @@ Projede geçen SAP ve CAP terimleri, alfabetik sırayla. Aşama numarası verile
 | ABAP Unit | ABAP'ın birim test çatısı; RAP'te test double'larla birlikte kullanılır. |
 | Adaptör (database service) | CAP'in belirli bir veritabanıyla konuşan paketi: `@cap-js/postgres`, `@cap-js/sqlite`, `@cap-js/hana`. |
 | ADT (ABAP Development Tools) | ABAP geliştirmek için kullanılan Eclipse eklentisi. |
+| `@Aggregation.default` | Bir ölçünün varsayılan toplama fonksiyonu (`#SUM`, `#AVG`, `#MAX`...). |
+| Analytical List Page (ALP) | Grafik ve analitik tabloyu aynı filtrelerle birlikte gösteren Fiori Elements analiz şablonu. |
 | Annotation (anotasyon) | `@` ile başlayan ek bilgi (`@title`, `@mandatory`, `@UI...`); modele davranış veya görünüm bilgisi ekler. |
 | API anahtarı (APIKey) | Sandbox isteklerinde `APIKey` başlığıyla gönderilen kişisel anahtar. Gizli bilgidir: sadece `.env`'de durur, commit'lenmez. |
 | API Business Hub (api.sap.com) | SAP API'lerinin kataloğu (SAP Business Accelerator Hub): API tanımı (EDMX) indirilir, sandbox'ta API anahtarıyla denenir (Aşama 8). |
+| `$apply` | OData V4'ün veri toplama uzantısı: `groupby`, `aggregate`, `filter` dönüşümleri; SQL'deki `GROUP BY` + `SUM`'ın karşılığı (Aşama 9). |
 | Aspect | Entity'lere eklenebilen hazır alan grubu (`cuid`, `managed`). |
 | Association (ilişki) | Bağımsız bir kayda başvuru; tabloda yabancı anahtar sütunu oluşturur. |
 | Authentication / Authorization | Kimlik doğrulama (kimsin? → 401) / yetkilendirme (izin var mı? → 403). |
 | BDEF (Behavior Definition) | RAP'te bir iş nesnesinin davranışını (CRUD, action, validation, determination) bildiren nesne. |
 | Birim / entegrasyon testi | Tek fonksiyonu izole test etmek / tüm katmanları (OData → handler → veritabanı) birlikte test etmek. |
 | Bound action | Bir entity kaydına bağlı işlem: `Rentals(...)/RentalService.approve`. |
+| Boyut / ölçü (dimension / measure) | Analitikte gruplanan alan (şube, ay) / toplanan sayısal alan (ciro, adet). |
 | BTP (Business Technology Platform) | SAP'nin bulut platformu; CAP uygulamaları genelde buraya deploy edilir. |
 | Business Partner | S/4HANA'da müşteri, tedarikçi gibi tüm iş ortaklarının ortak ana veri nesnesi (`API_BUSINESS_PARTNER`, Aşama 8). |
 | Calculated element | Tabloda saklanmayan, okuma anında hesaplanan alan (`fullName`). |
@@ -40,6 +44,7 @@ Projede geçen SAP ve CAP terimleri, alfabetik sırayla. Aşama numarası verile
 | Destination | BTP'de uzak bir sistemin adresini ve kimlik bilgisini koddan ayrı tutan bağlantı tanımı (Aşama 8, 10). |
 | Draft (taslak) | Kaydetmeden önce değişikliklerin ayrı bir tabloda tutulduğu düzenleme modeli. |
 | DraftAdministrativeData | Taslağın kimin tarafından ne zaman oluşturulduğu ve kimde kilitli olduğu bilgisi. |
+| Drill-down (ayrıntıya inme) | Grafikte bir boyuttan alt boyuta geçmek (şube → ay). |
 | EML (Entity Manipulation Language) | RAP'te iş nesnesini okuma/değiştirme dili: `READ ENTITIES`, `MODIFY ENTITIES`. |
 | Entity | Veritabanında tabloya, serviste OData entity set'ine dönüşen veri tanımı. |
 | Event handler (olay işleyici) | `before` / `on` / `after` fazlarında bir olaya (`SAVE`, `PATCH`, `approve`...) bağlanan fonksiyon. |
@@ -80,4 +85,5 @@ Projede geçen SAP ve CAP terimleri, alfabetik sırayla. Aşama numarası verile
 | Test double | Testte gerçek bağımlılık (veritabanı, iş nesnesi) yerine kullanılan sahte nesne. |
 | Unbound action | Bir kayda bağlı olmayan, servis düzeyindeki işlem: `POST /rental/importFromS4`. |
 | Value Help | Alan için seçim penceresi veya açılır liste (`@Common.ValueList`). |
+| Varyant (variant) | Kullanıcının filtre, sütun ve grafik ayarlarını isimle kaydetmesi ("Standart" menüsü). |
 | XSUAA | BTP'nin kimlik ve yetki servisi; JWT token üretir. Yapılandırması `xs-security.json`. |

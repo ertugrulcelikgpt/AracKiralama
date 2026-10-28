@@ -1,5 +1,6 @@
 using {RentalService} from './rental-service';
 using {AdminService} from './admin-service';
+using {AnalyticsService} from './analytics-service';
 
 // Roller:
 //   RentalAgent   – şube çalışanı: kiralama oluşturur/düzenler, müşteri ekler, tamamlar ve iptal eder
@@ -26,3 +27,6 @@ annotate RentalService.Customers with @(restrict: [{
 }]);
 
 annotate AdminService with @(requires: 'FleetAdmin');
+
+// Analizler sadece yöneticiye açık (ciro bilgisi)
+annotate AnalyticsService with @(requires: 'RentalManager');
