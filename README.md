@@ -37,7 +37,7 @@ Veritabanını sıfırlamak için: `npm run db:reset`. Durdurmak için: `npm run
 
 | Klasör / Dosya | Amaç |
 |---|---|
-| `db/` | Veri modeli (CDS entity'leri) ve örnek veriler (CSV) |
+| `db/` | Veri modeli: `schema.cds` (kiralama), `master-data.cds` (ana veriler), `labels.cds` (etiketler), `data/*.csv` |
 | `srv/` | Servis tanımları ve iş mantığı (JavaScript) |
 | `app/` | Fiori Elements arayüzleri ve UI anotasyonları |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
@@ -64,8 +64,8 @@ Aşama 4'te (yetkilendirme) eklenecek: `agent`, `manager`, `admin`.
 | Aşama | Konu | Durum |
 |---|---|---|
 | 0 | Ortam ve iskelet (CAP, PostgreSQL, profiller) | ✅ |
-| 1 | Veri modeli ve örnek veri | ⏳ |
-| 2 | Servisler | |
+| 1 | Veri modeli ve örnek veri | ✅ |
+| 2 | Servisler | ⏳ |
 | 3 | İş mantığı (K1–K8, action'lar) | |
 | 4 | Yetkilendirme | |
 | 5 | Fiori Elements arayüzü | |

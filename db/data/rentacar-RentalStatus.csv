@@ -1,0 +1,6 @@
+code;name;criticality
+O;Open;2
+A;Approved;3
+R;Rejected;1
+C;Completed;5
+X;Canceled;0

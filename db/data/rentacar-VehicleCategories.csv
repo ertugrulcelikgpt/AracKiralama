@@ -1,0 +1,5 @@
+code;name;descr;minDriverAge;minLicenseYears
+ECO;Economy;Small, fuel-efficient cars;21;1
+CMP;Compact;Mid-size cars;21;1
+SUV;SUV;Sport utility vehicles;23;2
+LUX;Luxury;Premium cars;25;3

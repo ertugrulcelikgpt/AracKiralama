@@ -22,3 +22,14 @@
 | `complete(returnKm)` | Agent, Manager | status = A, returnKm ≥ mileage | status → C, aracın km'si güncellenir |
 | `cancel()` | Agent, Manager | status ∈ {O, A} | status → X |
 | `applyDiscount(percent)` | Manager | status = O, 1 ≤ percent ≤ 30 | ek indirim, toplam yeniden hesaplanır |
+
+## Kararlar
+
+Prompttaki belirsiz noktalar için alınan kararlar:
+
+| Konu | Karar |
+|---|---|
+| İndirimlerin birleşmesi | `discountAmount = basePrice × (uzun süre % + discountPercent) / 100`. Toplam oran en fazla %30. Yöneticinin oranı `discountPercent` alanında saklanır; `applyDiscount` tekrar çağrılırsa eski oranın yerine geçer. |
+| Aynı gün teslim (K2) | İade günü = sonraki teslim günü çakışma sayılmaz. Çakışma: `yeni.pickupDate < mevcut.returnDate AND yeni.returnDate > mevcut.pickupDate`. |
+| `pickupKm` | `approve()` sırasında aracın o anki `mileage` değeri yazılır. `complete()` `returnKm ≥ pickupKm` kontrol eder. |
+| İade şubesi | Araç farklı şubeye iade edilse de `homeBranch` değişmez. |

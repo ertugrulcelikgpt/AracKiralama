@@ -15,3 +15,12 @@
 | ABAP | SAP'nin kendi programlama dili; S/4HANA'nın büyük kısmı ABAP ile yazılmıştır. |
 | RAP (RESTful ABAP Programming Model) | ABAP dünyasında CAP'in karşılığı olan modern uygulama geliştirme modeli. |
 | ADT (ABAP Development Tools) | ABAP geliştirmek için kullanılan Eclipse eklentisi. |
+| Entity | Veritabanında tabloya, serviste OData entity set'ine dönüşen veri tanımı. |
+| Aspect | Entity'lere eklenebilen hazır alan grubu (`cuid`, `managed`). |
+| Association (ilişki) | Bağımsız bir kayda başvuru; tabloda yabancı anahtar sütunu oluşturur. |
+| Composition (bileşim) | Parça-bütün ilişkisi; alt kalemler ana kayıtla birlikte yaşar ve silinir. |
+| CodeList (kod listesi) | `code` + çok dilli `name`/`descr` alanlı küçük referans tablosu (statü, kategori vb.). |
+| Localized | Çevirisi tutulan alan; `_texts` tablosu ve `localized_` view'ı ile çalışır. |
+| Annotation (anotasyon) | `@` ile başlayan ek bilgi (`@title`, `@mandatory`, `@UI...`); modele davranış veya görünüm bilgisi ekler. |
+| Calculated element | Tabloda saklanmayan, okuma anında hesaplanan alan (`fullName`). |
+| CSN (Core Schema Notation) | CDS modelinin derlenmiş JSON hali; CAP çalışma zamanında bunu kullanır. |

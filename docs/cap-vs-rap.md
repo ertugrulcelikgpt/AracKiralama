@@ -8,3 +8,11 @@
 | Proje / paket | npm projesi (`package.json`), git deposu | ABAP paketi (`Z...`), transport request, abapGit |
 | Veritabanı | Profil ile seçilir: PostgreSQL, SQLite, HANA | Her zaman ABAP sisteminin kendi veritabanı (SAP HANA) |
 | Ortam ayarları | `package.json` → `cds` bölümü, profiller, `.env` | Sistem/client ayarları; ayrı "profil" kavramı yok |
+| Veri modeli | `db/schema.cds` entity | Veritabanı tablosu + CDS view entity (`define root view entity`) |
+| Ana/alt belge | `Composition of many` | `composition [0..*] of` / `association to parent` |
+| İlişki | `Association to Vehicles` (FK `vehicle_ID`) | `association [1..1] to ZI_RENT_Vehicle` |
+| Ortak alanlar | Aspect: `cuid`, `managed` | Tabloya elle eklenen alanlar + `@Semantics.user.createdBy` vb. |
+| Kod listeleri / çeviri | `CodeList` + `localized` → `_texts` tablosu | Domain sabit değerleri veya text tablosu + `@ObjectModel.text.association` |
+| Hesaplanan alan | `fullName : String = firstName \|\| ' ' \|\| lastName` | CDS view'da `concat_with_space(...) as FullName` |
+| Benzersizlik | `@assert.unique` | Tabloda ikincil benzersiz indeks veya validation |
+| Örnek veri | `db/data/*.csv` + `cds deploy` | Veri üreten bir ABAP sınıfı (`if_oo_adt_classrun`) |
