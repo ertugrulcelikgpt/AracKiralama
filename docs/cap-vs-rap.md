@@ -14,6 +14,9 @@ Aşağıdaki tablo bu projedeki her yapının RAP karşılığını verir. RAP k
 | Proje / paket | npm projesi (`package.json`), git deposu | ABAP paketi (`Z...`), transport request, abapGit |
 | Veritabanı | Profil ile seçilir: PostgreSQL, SQLite, HANA | Her zaman ABAP sisteminin kendi veritabanı (SAP HANA) |
 | Ortam ayarları | `package.json` → `cds` bölümü, profiller, `.env` | Sistem/client ayarları; ayrı "profil" kavramı yok |
+| Canlıya alma | `mta.yaml` + `mbt build` + `cf deploy` ([`deploy.md`](deploy.md)) | Transport request veya gCTS / abapGit |
+| Veritabanı nesnelerinin kurulumu | HDI container + `.hdbtable` / `.hdbview` (`cds build`) | ABAP Dictionary, aktivasyonla |
+| Giriş kapısı | Approuter + XSUAA (JWT) | ABAP sisteminin kendi oturumu / SAP Fiori Launchpad |
 
 ### Veri modeli
 | Konu | Bu projede (CAP) | ABAP RAP karşılığı |

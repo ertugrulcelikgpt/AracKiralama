@@ -116,6 +116,11 @@ describe('S/4HANA Business Partner (mock)', () => {
       expect(classifyS4Error(err).message).to.equal('S4_UNREACHABLE')
     })
 
+    it('BTP\'de destination yoksa → S4_NOT_CONFIGURED', () => {
+      const err = new Error('Error during request to remote service: Failed to load destination. Caused by: Could not find service binding of type \'destination\'.')
+      expect(classifyS4Error(err).message).to.equal('S4_NOT_CONFIGURED')
+    })
+
     it('diğer hatalar durum koduyla S4_ERROR', () => {
       expect(classifyS4Error(remote(500))).to.deep.equal({ status: 502, message: 'S4_ERROR', args: [500] })
     })

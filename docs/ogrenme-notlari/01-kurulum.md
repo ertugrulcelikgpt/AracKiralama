@@ -31,7 +31,7 @@ CAP ayarlarını `package.json` → `cds` altından okur. Köşeli parantezli an
 
 - `NODE_ENV` production değilse `development` profili aktiftir. `cds watch` ve `cds deploy` PostgreSQL'e gider.
 - `cds test` / `npm test` `test` profilini ekler. Test profili sonradan yazıldığı için baskın gelir ve SQLite kullanılır.
-- `--profile <ad>` veya `CDS_ENV=<ad>` ile profil seçilir. Aşama 10'da `[production]` → `hana` eklenecek.
+- `--profile <ad>` veya `CDS_ENV=<ad>` ile profil seçilir. `[production]` → `hana` Aşama 10'da eklendi.
 
 **Kod neden hiç değişmiyor?** Servis kodumuz veritabanına doğrudan değil, CAP'in veritabanı servisine
 (`cds.connect.to('db')`) CQL sorgusu gönderir. Hangi adaptörün (`@cap-js/postgres`, `@cap-js/sqlite`, `@cap-js/hana`)

@@ -39,7 +39,7 @@ dosyalarını yükler. Handler kodu farkı bilmez. Bu sayede:
 
 ### Profil ile mod seçimi
 `package.json`'da `"[sandbox]": { "credentials": { "url": ... } }` yazıldı. `--profile sandbox` ile başlatılınca
-credentials dolar ve CAP gerçekten HTTP isteği atar. Production'da (Aşama 10) `credentials.destination`
+credentials dolar ve CAP gerçekten HTTP isteği atar. Production'da (Aşama 10, `docs/deploy.md`) `credentials.destination`
 kullanılacak. **Kod hiç değişmez**, sadece yapılandırma değişir.
 
 ### Uzak entity'yi kendi servisinde yayınlamak

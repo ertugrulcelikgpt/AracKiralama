@@ -84,7 +84,7 @@ ona bakar:
 |---|---|---|---|
 | **Mock** (varsayılan) | `npm run watch`, `npm test`. Credentials yok ve `--with-mocks` açık → CAP servisi yerelde taklit eder | `srv/external/data/*.csv` (geliştirmede PostgreSQL tablosu, testte SQLite) | Günlük geliştirme, testler, internet yokken |
 | **Sandbox** | `npm run sandbox` (`cds serve all --profile sandbox`) + `.env`'de `BP_API_KEY` | `https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_BUSINESS_PARTNER`, her istekte `APIKey` başlığı | Gerçek S/4 verisiyle (SAP'nin demo verisi) denemek; salt okunur |
-| **Production** | `[production]` profili, BTP'de (Aşama 10) | BTP Destination servisi → (gerekirse) Cloud Connector → müşterinin S/4 sistemi | Canlı kullanım |
+| **Production** | `[production]` profili, BTP'de ([`deploy.md`](deploy.md#3-api_business_partner-destinationı)) | BTP Destination servisindeki `API_BUSINESS_PARTNER` destination'ı → (gerekirse) Cloud Connector → S/4 sistemi | Canlı kullanım |
 
 ```jsonc
 // package.json (özet)
@@ -96,8 +96,14 @@ ona bakar:
       "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_BUSINESS_PARTNER",
       "requestTimeout": 10000
     }
+  },
+  "[production]": {
+    "credentials": {
+      "destination": "API_BUSINESS_PARTNER",
+      "path": "/s4hanacloud/sap/opu/odata/sap/API_BUSINESS_PARTNER",
+      "requestTimeout": 10000
+    }
   }
-  // Aşama 10: "[production]": { "credentials": { "destination": "S4HANA_BP", "path": "/sap/opu/odata/sap/API_BUSINESS_PARTNER" } }
 }
 ```
 
@@ -169,13 +175,16 @@ Yanıtta da çeviri vardır: V2 tarih biçimi `/Date(749606400000)/` → `1993-1
 ## Hata yönetimi
 
 S/4'e ulaşılamaması uygulamayı çökertmemeli; kullanıcı ne olduğunu anlamalı. CAP uzak servis hatalarını 502 ile
-sarar; `classifyS4Error` gerçek sebebi bulup i18n mesaj anahtarına çevirir:
+sarar; `classifyS4Error` gerçek sebebi bulup i18n mesaj anahtarına çevirir. CAP production'da 5xx mesajlarını
+genel bir metinle ("Bad Gateway") değiştirir; bu mesajlar kullanıcıya yönelik olduğu için `$sanitize: false` ile
+olduğu gibi gösterilir:
 
 | Durum | Ne olur | Kullanıcıya | Doğrulama |
 |---|---|---|---|
 | Yanlış/eksik API anahtarı, yetkisiz destination | S/4 401/403 döner | 502 `S4_UNAUTHORIZED`: "S/4HANA erişimi reddedildi (401/403)..." | Sahte sandbox sunucusu + yanlış anahtar |
 | S/4 yavaş (`requestTimeout` aşıldı) | Yanıt yok | 504 `S4_UNREACHABLE`: "S/4HANA sistemine şu anda ulaşılamıyor..." | 15 sn bekleyen sahte sunucu, 3 sn zaman aşımı |
 | Sunucu kapalı / DNS hatası (`ECONNREFUSED`, `ENOTFOUND`) | Bağlantı kurulamaz | 504 `S4_UNREACHABLE` | Kapalı port, engelli alan adı |
+| BTP'de destination yok veya adı yanlış | Bağlantı kurulmadan hata | 502 `S4_NOT_CONFIGURED`: "S/4HANA bağlantısı yapılandırılmamış..." | `NODE_ENV=production` ile yerel duman testi + birim testi |
 | S/4 başka bir hata döner (500 vb.) | — | 502 `S4_ERROR`: "...(durum 500)" | Birim testi |
 | İş ortağı yok | — | 404 `S4_BP_NOT_FOUND` | Mock testi |
 | İş ortağı bir kurum | — | 400 `S4_BP_NOT_PERSON` | Mock testi + ekran |
@@ -197,7 +206,8 @@ flowchart LR
 
 - **Destination servisi (BTP):** Hedef sistemin URL'ini ve kimlik bilgilerini (Basic, OAuth2SAMLBearer,
   ClientCertificate...) kodun dışında, BTP cockpit'te tutar. Uygulama sadece adını bilir:
-  `"credentials": { "destination": "S4HANA_BP", "path": "/sap/opu/odata/sap/API_BUSINESS_PARTNER" }`.
+  `"credentials": { "destination": "API_BUSINESS_PARTNER", "path": "..." }`. Sandbox için destination'a API anahtarı
+  `URL.headers.APIKey` özelliğiyle eklenir ([`deploy.md`](deploy.md#3-api_business_partner-destinationı)).
   Şifre değişince uygulama yeniden deploy edilmez.
 - **Cloud Connector:** Müşterinin şirket ağına kurulan küçük bir ajan. Buluttan içeri port açmadan, içeriden
   dışarıya güvenli tünel kurar. On-premise S/4 için gerekir; destination'da `ProxyType: OnPremise` yazılır.
@@ -205,8 +215,9 @@ flowchart LR
   `SAP_COM_0008`, Business Partner) ve bir communication user oluşturulur; destination bu kullanıcıyla bağlanır.
 - **Kullanıcı yetkisinin taşınması (principal propagation):** Teknik kullanıcı yerine, uygulamaya giren
   kullanıcının kimliğiyle S/4'e bağlanmak. Böylece S/4'teki yetkiler de uygulanır.
-- CAP tarafında `@sap-cloud-sdk/connectivity` bu çözümlemeyi yapar; `mta.yaml`'da `destination` ve
-  `connectivity` servisleri bağlanır (Aşama 10).
+- CAP tarafında `@sap-cloud-sdk/connectivity` bu çözümlemeyi yapar. `mta.yaml`'da `rentacar-destination` servisi
+  bağlıdır; on-premise bir S/4 için ayrıca `connectivity` servisi eklenir (`cds add connectivity`).
+- Destination bulunamazsa kullanıcı `S4_NOT_CONFIGURED` mesajını görür ("S/4HANA bağlantısı yapılandırılmamış").
 
 ## EDMX dosyası ve kendi indirdiğinle değiştirmek
 

@@ -67,6 +67,15 @@ flowchart LR
 
 Aynı CDS modeli, profil hangi veritabanını seçerse onun SQL diline (dialect) derlenir. Kod değişmez.
 
+| Profil | Veritabanı | Kimlik doğrulama | S/4HANA |
+|---|---|---|---|
+| `development` | PostgreSQL | mocked (agent/manager/admin) | mock |
+| `test` | SQLite `:memory:` | mocked | mock |
+| `development` + `sandbox` | PostgreSQL | mocked | SAP sandbox (`APIKey`) |
+| `production` (BTP) | SAP HANA Cloud (HDI) | XSUAA | Destination `API_BUSINESS_PARTNER` |
+
+Buluttaki yapı (approuter, XSUAA, HDI container, Destination servisi) ve deploy adımları: [`deploy.md`](deploy.md).
+
 ## Veri modeli
 
 `db/schema.cds` işlem verilerini (kiralama), `db/master-data.cds` ana verileri ve kod listelerini, `db/labels.cds`

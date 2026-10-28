@@ -61,15 +61,27 @@ Müşteriler S/4HANA'nın Business Partner API'sinden içe aktarılabilir. Üç 
 |---|---|---|
 | Mock (varsayılan) | `npm run watch` | `srv/external/data/*.csv` (10 kişi, 2 kurum); internet gerekmez |
 | SAP sandbox | `npm run sandbox` | `sandbox.api.sap.com`; `.env`'de `BP_API_KEY` gerekir |
-| Production | BTP Destination (Aşama 10) | Gerçek S/4HANA |
+| Production | BTP Destination `API_BUSINESS_PARTNER` ([`docs/deploy.md`](docs/deploy.md)) | Sandbox veya gerçek S/4HANA |
 
 Sandbox için api.sap.com'dan aldığın anahtarı **sadece** `.env` dosyasına yaz (`BP_API_KEY=...`). `.env`'i asla
 commit'leme veya GitHub web arayüzüyle yükleme. Ayrıntı: [`docs/s4-entegrasyonu.md`](docs/s4-entegrasyonu.md).
 
+## BTP'ye deploy (SAP HANA Cloud)
+
+Proje SAP BTP Cloud Foundry + SAP HANA Cloud için hazır. Paket üretmek için `npm install -g mbt` ve GNU Make gerekir:
+
+```powershell
+mbt build                                     # → mta_archives\rentacar_1.0.0.mtar
+cf deploy mta_archives\rentacar_1.0.0.mtar    # cf login sonrası
+```
+
+Trial hesabı, HANA Cloud instance'ı, S/4 destination'ı ve rol atamaları dahil tüm adımlar:
+[`docs/deploy.md`](docs/deploy.md).
+
 ## Testler
 
 ```powershell
-npm test            # 116 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
+npm test            # 117 entegrasyon + birim testi, bellek içi SQLite (Docker gerekmez)
 npm run test:pg     # aynı testler PostgreSQL'e karşı (ayrı rentacar_test veritabanı; önce npm run db:up)
 npm test -- --grep K2   # sadece adında "K2" geçen testler
 ```
@@ -96,7 +108,7 @@ aktarma (mock modunda; internet ve API anahtarı gerekmez), analitik toplamlar (
 |---|---|---|
 | `development` (varsayılan) | PostgreSQL 16 (Docker) | `cds watch`, `cds deploy` |
 | `test` | SQLite, bellek içi | `npm test` |
-| `production` | SAP HANA Cloud | BTP deploy (Aşama 10) |
+| `production` | SAP HANA Cloud (HDI) | BTP'de; kimlik doğrulama XSUAA ([`docs/deploy.md`](docs/deploy.md)) |
 | `sandbox` (ek profil) | PostgreSQL (development ile birlikte) | `npm run sandbox`: S/4 olarak SAP sandbox'ı kullanılır |
 
 ## Proje yapısı
@@ -109,7 +121,10 @@ aktarma (mock modunda; internet ve API anahtarı gerekmez), analitik toplamlar (
 | `app/` | Fiori Elements uygulamaları (`rentals`, `vehicles`, `customers`, `analytics`), ortak anotasyonlar (`common.cds`), launchpad (`index.html`) |
 | `_i18n/` | Arayüz metinleri (`i18n*.properties`) ve hata mesajları (`messages*.properties`) |
 | `test/` | Otomatik testler (`*.test.js`, Mocha + `@cap-js/cds-test`), `requests.http` örnek istekleri |
-| `xs-security.json` | BTP XSUAA yetki yapılandırması taslağı (Aşama 10'da kullanılacak) |
+| `xs-security.json` | BTP XSUAA: roller ve rol koleksiyonları |
+| `mta.yaml` | BTP paketi: CAP servisi, HANA HDI deployer, approuter; XSUAA, HDI container, Destination servisleri |
+| `.deploy/app-router/` | Approuter (`xs-app.json`: arayüzü sunar, OData'yı CAP'e iletir) |
+| `scripts/copy-ui.mjs` | `mbt build` sırasında Fiori uygulamalarını approuter'a kopyalar (`npm run build:ui`) |
 | `docs/` | Mimari, iş kuralları, CAP–RAP karşılaştırması, sözlük, öğrenme notları |
 | `docker-compose.yml` | Lokal PostgreSQL |
 | `.env.example` | Lokal ortam değişkenleri şablonu (`.env` commit edilmez) |
@@ -150,6 +165,10 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | `@sap/cds-dk` | 10.2.0 |
 | `@cap-js/postgres` | 3.1.2 |
 | `@cap-js/sqlite` | 3.1.2 |
+| `@cap-js/hana` | 3.1.2 |
+| `@sap/xssec` | 4.15.0 |
+| `@sap/approuter` | 23 |
+| Cloud MTA Build Tool (`mbt`) | 1.2.47 |
 | PostgreSQL | 16 |
 | SAPUI5 (CDN) | 1.153.0 |
 | `@cap-js/cds-test` + Mocha | 1.0.2 + 12.0.3 |
@@ -168,7 +187,7 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | 7 | Dokümantasyon ve gözden geçirme | ✅ |
 | 8 | S/4HANA Business Partner entegrasyonu | ✅ |
 | 9 | (Opsiyonel) Analitik | ✅ |
-| 10 | BTP deploy hazırlığı (SAP HANA Cloud) | |
+| 10 | BTP deploy hazırlığı (SAP HANA Cloud) — deploy senin adımın: [`docs/deploy.md`](docs/deploy.md) | ✅ |
 
 ## Dokümanlar
 
@@ -177,6 +196,7 @@ Ayrıntılı yetki tablosu: [`docs/mimari.md`](docs/mimari.md#yetkilendirme). BT
 | [Mimari](docs/mimari.md) | Katmanlar, veri modeli (ER diyagramı), istek akışı, yetki tablosu, testler |
 | [İş kuralları](docs/is-kurallari.md) | K1–K8, action'lar, silme koruması; her kuralın kodda ve testte yeri |
 | [CAP vs RAP](docs/cap-vs-rap.md) | Bu projedeki her yapının ABAP RAP karşılığı, hangisi ne zaman, RAP'i deneme yolları |
+| [BTP'ye deploy](docs/deploy.md) | Trial hesabı, HANA Cloud, destination, `mbt build` + `cf deploy`, rol koleksiyonları, kontrol listesi, HDI ile PostgreSQL farkı |
 | [S/4HANA entegrasyonu](docs/s4-entegrasyonu.md) | Mimari, mock/sandbox/destination modları, V2 → V4, hata yönetimi, Cloud Connector |
 | [Sözlük](docs/sozluk.md) | SAP/CAP terimleri (Türkçe) |
 | [Öğrenme notları](docs/ogrenme-notlari/README.md) | Her aşamanın kavramları, RAP karşılığı, sık hatalar ve alıştırmalar |

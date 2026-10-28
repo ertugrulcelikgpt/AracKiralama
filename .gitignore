@@ -23,3 +23,9 @@ mta_archives/
 .env
 .env.*
 !.env.example
+
+# BTP build çıktıları
+mta_archives/
+.*_mta_build_tmp/
+.deploy/app-router/resources/
+.deploy/app-router/node_modules/

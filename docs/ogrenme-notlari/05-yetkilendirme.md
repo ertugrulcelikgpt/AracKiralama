@@ -52,7 +52,8 @@ BTP'deki XSUAA servisinin yapılandırması. `cds compile srv --to xsuaa` CDS'te
 - **role-template:** scope'ları gruplayan şablon. BTP cockpit'te bundan rol oluşur.
 - **role-collection:** kullanıcılara atanan paket. `RentACar_Manager` = `RentalAgent` + `RentalManager`.
 
-Lokalde kullanılmaz; Aşama 10'da deploy hazırlığında devreye girer.
+Lokalde kullanılmaz; BTP'ye deploy edilince XSUAA bu dosyadan rolleri ve rol koleksiyonlarını oluşturur
+([`deploy.md`](../deploy.md#5-rol-koleksiyonlarını-kullanıcına-ata)).
 
 ### Mesajların dili
 CAP'in Türkçe mesaj dosyasında 401/403 metinleri çevrilmemiş ("Forbidden"). Projenin

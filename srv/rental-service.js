@@ -60,6 +60,9 @@ export function classifyS4Error(err) {
   const status = err?.reason?.response?.status ?? err?.response?.status
   if (status === 401 || status === 403) return { status: 502, message: 'S4_UNAUTHORIZED' }
   const text = `${err?.message} ${err?.reason?.message} ${err?.reason?.cause?.message ?? ''}`
+  // BTP'de Destination servisi bağlı değilse veya API_BUSINESS_PARTNER adlı destination yoksa
+  if (/Failed to load destination|service binding of type 'destination'/i.test(text))
+    return { status: 502, message: 'S4_NOT_CONFIGURED' }
   // Ağ hatalarında CAP kodu her zaman alana koymaz; bazen sadece mesaj metninde ("fetch failed ... ENOTFOUND") geçer
   const network = err?.reason?.cause?.code ?? err?.cause?.code ?? err?.code ?? ''
   if (/timeout|timed out|fetch failed|ECONNREFUSED|ENOTFOUND|ECONNRESET|EAI_AGAIN/i.test(`${text} ${network}`) || status === 504)
@@ -350,8 +353,8 @@ export default class RentalService extends cds.ApplicationService {
     // =============================================================================================================
     const callS4 = async (req, run) => {
       try { return await run() } catch (err) {
-        const { status, message, args } = classifyS4Error(err)
-        return req.reject(status, message, args)
+        // $sanitize: false → CAP production'da 5xx mesajını "Bad Gateway" ile değiştirmez; mesajlarımız iç bilgi içermez
+        return req.reject({ ...classifyS4Error(err), $sanitize: false })
       }
     }
 

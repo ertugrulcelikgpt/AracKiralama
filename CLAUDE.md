@@ -20,7 +20,7 @@ Bu dosya, projeyi devralan bir Claude oturumu için özet, komutlar ve kurallard
 RentACar: SAP CAP (Node.js) ile çok şubeli bir araç kiralama uygulaması. Mimari SAP-samples/cap-sflight'tan
 esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat, ABAP RAP karşılığını ver.
 
-- Veritabanı: development → PostgreSQL (`@cap-js/postgres`, Docker), test → SQLite in-memory, production → SAP HANA Cloud (Aşama 10).
+- Veritabanı: development → PostgreSQL (`@cap-js/postgres`, Docker), test → SQLite in-memory, production → SAP HANA Cloud (HDI, `docs/deploy.md`).
 - Bağlantı bilgileri `.env` içinde (`CDS_REQUIRES_DB_CREDENTIALS_*`), commit edilmez; şablon `.env.example`.
 - Kullanıcının ortamı Windows 11 + PowerShell; ona verilen komutlar PowerShell uyumlu olmalı.
 
@@ -37,6 +37,8 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 | `npm test` | Tüm testler, bellek içi SQLite (Mocha, `test/setup.cjs`) |
 | `npm run test:pg` | Aynı testler PostgreSQL `rentacar_test` veritabanında (`test/setup-pg.cjs` oluşturur) |
 | `npm run lint` | ESLint |
+| `npm run build:ui` | Fiori uygulamalarını `.deploy/app-router/resources`'a kopyalar (`mbt build` bunu kendisi çağırır) |
+| `mbt build` | BTP paketi `mta_archives/rentacar_1.0.0.mtar` (`npm i -g mbt`; GNU Make gerekir). Deploy kullanıcının işi |
 
 ## Kod kuralları
 
@@ -62,7 +64,7 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 - Uzak servis `API_BUSINESS_PARTNER` (OData V2): model `srv/external/`, mock verisi `srv/external/data/*.csv`.
   Ayrıntı: `docs/s4-entegrasyonu.md`.
 - Mod credentials'a göre seçilir: yoksa mock (`--with-mocks`; `cds watch`, `db:deploy` ve `test/helpers.js` bunu
-  verir), `[sandbox]` profilinde URL + `APIKey` başlığı, production'da Destination (Aşama 10).
+  verir), `[sandbox]` profilinde URL + `APIKey` başlığı, production'da Destination `API_BUSINESS_PARTNER` (BTP cockpit'te, `URL.headers.APIKey`).
 - `BP_API_KEY` sadece `process.env`'den okunur (CAP `.env`'i development profilinde yükler). Koda, loga,
   `.env.example`'a yazma. Doğrulamak gerekirse değeri değil uzunluğunu yazdır.
 - Sandbox için `cds watch` değil `cds serve` kullan: `cds watch` yerel bağlantı kaydından (`~/.cds-services.json`)
@@ -81,6 +83,20 @@ esinlenir. Kullanıcı CAP öğreniyor: her aşamada kavramları Türkçe anlat,
 - `srv/analytics-service.js`: sıralamasız gruplu sorguya gruplama alanlarına göre `orderBy` ekler (aylık trend).
 - `substring` 0'dan sayar. Örnek veride 1012–1040 tamamlanmış geçmiş kiralamalar (Nisan–Ekim) analitik içindir;
   yeni kiralama numarası 1041'den başlar.
+
+## BTP / production (Aşama 10)
+
+- Deploy etme; kullanıcı `docs/deploy.md`'deki adımları kendisi uygular. Doğrulama: `cds build --production`,
+  `cds compile db --to hana`, `mbt build`.
+- `[production]`: `db.kind: hana` açıkça yazılı (yoksa `@cap-js/postgres` seçiliyor), `auth: xsuaa`,
+  S/4 `destination: API_BUSINESS_PARTNER`. Kontrol: `npx cds env requires.db --profile production`.
+- `cds add ...` dosyaları ezebilir: `xs-security.json` elle yazılmıştır (scope'ları ikiler), `mta.yaml`'a PostgreSQL
+  eklememeli. Her `cds add` sonrası `git diff`.
+- Arayüzü approuter sunar (`.deploy/app-router/xs-app.json` `localDir` rotaları); yeni Fiori uygulaması eklenirse
+  `scripts/copy-ui.mjs` ve `xs-app.json` rotasını güncelle.
+- S/4 hataları `$sanitize: false` ile production'da da görünür; yeni kullanıcıya yönelik 5xx hatalarında da gerekir.
+- Production profilini yerelde denemek: `NODE_ENV=production` + `CDS_CONFIG` ile db'yi sqlite `:memory:`, auth'u
+  mocked yap (`cds serve all --in-memory`).
 
 ## Yetki
 
