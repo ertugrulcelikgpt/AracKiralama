@@ -29,3 +29,8 @@ mta_archives/
 .*_mta_build_tmp/
 .deploy/app-router/resources/
 .deploy/app-router/node_modules/
+
+# cds serve ile yanlışlıkla oluşan yerel SQLite dosyaları
+rentacar
+rentacar-shm
+rentacar-wal
